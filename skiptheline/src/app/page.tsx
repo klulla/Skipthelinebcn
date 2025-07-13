@@ -23,52 +23,57 @@ export default function HomePage() {
         
         <div className="absolute inset-0 bg-gradient-to-br from-neon-pink/5 via-transparent to-neon-teal/5" />
         
-        <div className="container-responsive section-spacing text-center">
-          <div className="float-animation">
-            <div className="flex justify-center element-spacing">
-              <div className="p-6 bg-gradient-to-r from-neon-pink via-neon-purple to-neon-teal rounded-3xl neon-glow-rainbow">
-                <Zap className="w-16 h-16 text-black" />
+        <div className="container-responsive section-spacing">
+          <div className="center-content flex-col">
+            <div className="float-animation">
+              <div className="center-content element-spacing">
+                <div className="p-6 bg-gradient-to-r from-neon-pink via-neon-purple to-neon-teal rounded-3xl neon-glow-rainbow">
+                  <Zap className="w-16 h-16 text-black" />
+                </div>
               </div>
             </div>
-          </div>
           
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black element-spacing leading-tight">
-            Skip The Line,
-            <br />
-            <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-teal bg-clip-text text-transparent text-glow-pink">
-              Own The Night
-            </span>
-          </h1>
-          
-          <p className="text-xl sm:text-2xl text-gray-300 element-spacing max-w-4xl mx-auto leading-relaxed font-medium">
-            VIP fast-entry to Barcelona's most exclusive clubs. 
-            <br className="hidden sm:block" />
-            <span className="text-neon-teal">No guestlist, no waiting</span> — just pure nightlife access.
-          </p>
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black element-spacing leading-tight center-text">
+              Skip The Line,
+              <br />
+              <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-teal bg-clip-text text-transparent text-glow-pink">
+                Own The Night
+              </span>
+            </h1>
+            
+            <p className="text-xl sm:text-2xl text-gray-300 element-spacing max-w-4xl mx-auto leading-relaxed font-medium center-text">
+              VIP fast-entry to Barcelona's most exclusive clubs. 
+              <br className="hidden sm:block" />
+              <span className="text-neon-teal">No guestlist, no waiting</span> — just pure nightlife access.
+            </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 element-spacing">
-            <div className="flex items-center text-neon-teal bg-gray-900/50 px-6 py-3 rounded-full glass-effect">
-              <Star className="w-6 h-6 mr-3" />
-              <span className="font-semibold text-lg">VIP Line Access</span>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 element-spacing">
+              <div className="flex items-center text-neon-teal bg-gray-900/50 px-6 py-3 rounded-full glass-effect">
+                <Star className="w-6 h-6 mr-3" />
+                <span className="font-semibold text-lg">VIP Line Access</span>
+              </div>
+              <div className="flex items-center text-neon-pink bg-gray-900/50 px-6 py-3 rounded-full glass-effect">
+                <Sparkles className="w-6 h-6 mr-3" />
+                <span className="font-semibold text-lg">Instant Entry</span>
+              </div>
+              <div className="flex items-center text-neon-green bg-gray-900/50 px-6 py-3 rounded-full glass-effect">
+                <Shield className="w-6 h-6 mr-3" />
+                <span className="font-semibold text-lg">100% Guaranteed</span>
+              </div>
             </div>
-            <div className="flex items-center text-neon-pink bg-gray-900/50 px-6 py-3 rounded-full glass-effect">
-              <Sparkles className="w-6 h-6 mr-3" />
-              <span className="font-semibold text-lg">Instant Entry</span>
-            </div>
-            <div className="flex items-center text-neon-green bg-gray-900/50 px-6 py-3 rounded-full glass-effect">
-              <Shield className="w-6 h-6 mr-3" />
-              <span className="font-semibold text-lg">100% Guaranteed</span>
-            </div>
-          </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <button className="btn-neon px-12 py-4 rounded-2xl font-bold text-lg text-black ripple">
-              Browse Events
-            </button>
-            <button className="text-gray-300 hover:text-neon-pink transition-colors font-semibold text-lg flex items-center">
-              <Globe className="w-5 h-5 mr-2" />
-              How It Works
-            </button>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+              <button
+                onClick={() => window.location.href = '/clubs'}
+                className="btn-neon px-12 py-4 rounded-2xl font-bold text-lg text-black ripple"
+              >
+                Browse Events
+              </button>
+              <button className="text-gray-300 hover:text-neon-pink transition-colors font-semibold text-lg flex items-center">
+                <Globe className="w-5 h-5 mr-2" />
+                How It Works
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -206,7 +211,10 @@ export default function HomePage() {
             <p className="text-gray-400 text-lg element-spacing max-w-2xl mx-auto">
               Join thousands of smart party-goers who've discovered the secret to Barcelona's best nights out.
             </p>
-            <button className="btn-neon px-10 py-4 rounded-2xl font-bold text-lg text-black ripple">
+            <button
+              onClick={() => window.location.href = '/clubs'}
+              className="btn-neon px-10 py-4 rounded-2xl font-bold text-lg text-black ripple"
+            >
               View Tonight's Events
             </button>
           </div>

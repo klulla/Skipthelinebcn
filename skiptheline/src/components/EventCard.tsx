@@ -3,12 +3,17 @@
 import Link from 'next/link';
 import { Calendar, Clock, MapPin, Star, TrendingUp, Sparkles } from 'lucide-react';
 import { Event } from '@/types';
+import { mockClubs } from '@/data/mockData';
 
 interface EventCardProps {
   event: Event;
 }
 
 export default function EventCard({ event }: EventCardProps) {
+  const club = mockClubs.find(c => c.id === event.clubId);
+  const clubName = club?.name || 'Unknown Club';
+  const clubLocation = club?.location || 'Unknown Location';
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -74,14 +79,14 @@ export default function EventCard({ event }: EventCardProps) {
           <div className="px-3 py-1 bg-gray-900/80 backdrop-blur-sm rounded-full border border-gray-700/50">
             <div className="flex items-center space-x-1 text-yellow-400 text-xs font-medium">
               <Star className="w-3 h-3 fill-current" />
-              <span>Premium</span>
+              <span>{club?.type ? club.type.charAt(0).toUpperCase() + club.type.slice(1) : 'Premium'}</span>
             </div>
           </div>
         </div>
 
         {/* Event Title Overlay */}
         <div className="absolute bottom-6 left-6 right-6">
-          <h3 className="text-2xl font-black text-white mb-1 text-glow-pink">{event.clubName}</h3>
+          <h3 className="text-2xl font-black text-white mb-1 text-glow-pink">{clubName}</h3>
           <p className="text-neon-pink font-bold text-lg">{event.title}</p>
           <div className="mt-3 flex items-center text-gray-300 text-sm">
             <Calendar className="w-4 h-4 mr-2" />
@@ -97,12 +102,12 @@ export default function EventCard({ event }: EventCardProps) {
           <div className="space-y-3">
             <div className="flex items-center text-gray-400 text-sm">
               <Clock className="w-4 h-4 mr-3 text-neon-teal" />
-              <span>{event.arrivalWindow}</span>
+              <span>{event.time}</span>
             </div>
             
             <div className="flex items-center text-gray-400 text-sm">
               <MapPin className="w-4 h-4 mr-3 text-neon-pink" />
-              <span className="truncate">{event.location.split(',')[0]}</span>
+              <span className="truncate">{clubLocation.split(',')[0]}</span>
             </div>
           </div>
 

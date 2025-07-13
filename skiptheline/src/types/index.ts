@@ -1,17 +1,28 @@
+export interface Club {
+  id: string;
+  name: string;
+  location: string;
+  description: string;
+  imageUrl: string;
+  capacity: number;
+  type: 'nightclub' | 'rooftop' | 'beach' | 'underground';
+  amenities: string[];
+  status: 'active' | 'inactive';
+}
+
 export interface Event {
   id: string;
   title: string;
-  clubName: string;
+  clubId: string; // Changed from clubName to clubId
   date: string;
   time: string;
   price: number;
   description: string;
-  arrivalWindow: string;
+  // Removed arrivalWindow
   maxTickets: number;
   soldTickets: number;
   imageUrl: string;
   status: 'active' | 'sold-out' | 'hidden';
-  location: string;
   stripePaymentLink: string;
   availability: number; // Available spots remaining (maxTickets - soldTickets but managed separately)
 }
@@ -45,15 +56,14 @@ export interface Testimonial {
 
 export interface EventFormData {
   title: string;
-  clubName: string;
+  clubId: string; // Changed from clubName to clubId
   date: string;
   time: string;
   price: number;
   description: string;
-  arrivalWindow: string;
+  // Removed arrivalWindow
   maxTickets: number;
   imageUrl: string;
-  location: string;
   stripePaymentLink: string;
   availability: number;
 }

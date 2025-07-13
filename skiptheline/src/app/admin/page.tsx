@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import EventForm from '@/components/EventForm';
-import { mockEvents, mockPurchases, adminCredentials } from '@/data/mockData';
+import { mockEvents, mockPurchases, adminCredentials, mockClubs } from '@/data/mockData';
 import { Event, Purchase, EventFormData } from '@/types';
 import { 
   Lock, 
@@ -142,8 +142,10 @@ export default function AdminPage() {
 
   // Filter events
   const filteredEvents = events.filter(event => {
+    const club = mockClubs.find(c => c.id === event.clubId);
+    const clubName = club?.name || 'Unknown Club';
     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         event.clubName.toLowerCase().includes(searchQuery.toLowerCase());
+                         clubName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filterStatus === 'all' || event.status === filterStatus;
     return matchesSearch && matchesFilter;
   });
@@ -220,7 +222,7 @@ export default function AdminPage() {
     <div className="min-h-screen bg-background gradient-bg">
       <Header />
       
-      <div className="container-responsive section-spacing">
+      <div className="container-responsive section-spacing admin-container">
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between element-spacing">
           <div>
@@ -411,13 +413,15 @@ export default function AdminPage() {
 
             <div className="grid grid-responsive grid-responsive-2 xl:grid-responsive-3">
               {filteredEvents.map((event) => {
+                const club = mockClubs.find(c => c.id === event.clubId);
+                const clubName = club?.name || 'Unknown Club';
                 const soldPercentage = ((event.maxTickets - event.availability) / event.maxTickets) * 100;
                 return (
                   <div key={event.id} className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50 card-hover">
                     <div className="flex justify-between items-start mb-6">
                       <div className="flex-1">
                         <h3 className="text-xl font-bold text-white mb-2">{event.title}</h3>
-                        <p className="text-gray-400 font-medium">{event.clubName}</p>
+                        <p className="text-gray-400 font-medium">{clubName}</p>
                       </div>
                       
                       <div className="flex items-center space-x-2">

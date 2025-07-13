@@ -380,6 +380,68 @@ body {
   }
 }
 
+/* Better centering utilities */
+.center-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.center-text {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Enhanced spacing for better padding */
+.padding-enhanced {
+  padding: var(--spacing-xl);
+}
+
+@media (min-width: 768px) {
+  .padding-enhanced {
+    padding: var(--spacing-2xl);
+  }
+}
+
+@media (min-width: 1024px) {
+  .padding-enhanced {
+    padding: var(--spacing-3xl);
+  }
+}
+
+/* Admin specific improvements */
+.admin-container {
+  padding: var(--spacing-lg);
+}
+
+@media (min-width: 768px) {
+  .admin-container {
+    padding: var(--spacing-xl);
+  }
+}
+
+@media (min-width: 1024px) {
+  .admin-container {
+    padding: var(--spacing-2xl);
+  }
+}
+
+/* Better rounded corners for admin cards */
+.admin-card {
+  border-radius: 1.5rem;
+  border: 1px solid rgba(55, 65, 81, 0.3);
+  padding: var(--spacing-lg);
+}
+
+@media (min-width: 768px) {
+  .admin-card {
+    border-radius: 2rem;
+    padding: var(--spacing-xl);
+  }
+}
+
 /* Grid responsive */
 .grid-responsive {
   display: grid;
