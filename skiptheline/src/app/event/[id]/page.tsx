@@ -234,8 +234,6 @@ export default function EventPage() {
                 </div>
               </div>
 
-
-
               <div className="p-6 bg-gradient-to-r from-neon-pink/10 to-neon-teal/10 border border-neon-pink/20 rounded-2xl mb-8">
                 <h3 className="font-bold text-neon-pink mb-4 flex items-center">
                   <CheckCircle className="w-5 h-5 mr-2" />
@@ -321,8 +319,9 @@ export default function EventPage() {
 
           {/* Purchase Sidebar */}
           <div className="lg:col-span-1">
-            <div className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50 sticky top-28">
-              {!showPayment ? (
+            <div className="glass-effect-strong rounded-3xl border border-gray-700/50 sticky top-28 overflow-hidden">
+              <div className="p-8">
+                {!showPayment ? (
                 <>
                   <div className="text-center mb-8">
                     <div className="text-4xl font-black text-transparent bg-gradient-to-r from-neon-pink to-neon-teal bg-clip-text mb-2">
@@ -477,17 +476,17 @@ export default function EventPage() {
                       Back to Details
                     </button>
                   </div>
-                  
-                              <PaymentForm
-              amount={totalPrice}
-              eventId={event.id}
-              eventTitle={event.title}
-              partySize={partySizeNum}
-              customerInfo={customerInfo}
-              stripePaymentLink={event.stripePaymentLink}
-            />
+                  <PaymentForm
+                    amount={totalPrice}
+                    eventId={event.id}
+                    eventTitle={event.title}
+                    partySize={partySizeNum}
+                    customerInfo={customerInfo}
+                    stripePaymentLink={event.stripePaymentLink}
+                  />
                 </>
               )}
+              </div>
             </div>
           </div>
         </div>
