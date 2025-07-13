@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/components/Header';
-import { mockEvents } from '@/data/mockData';
+import { mockEvents, mockClubs } from '@/data/mockData';
 import { 
   CheckCircle, 
   Calendar, 
@@ -25,14 +25,20 @@ export default function ConfirmationPage() {
   const eventId = searchParams.get('event');
   const partySize = parseInt(searchParams.get('party') || '1');
   const totalAmount = parseInt(searchParams.get('total') || '0');
+  const urlConfirmationId = searchParams.get('id');
 
   const event = mockEvents.find(e => e.id === eventId);
+  const club = event ? mockClubs.find(c => c.id === event.clubId) : null;
 
   useEffect(() => {
-    // Generate a random confirmation ID
-    const id = `STL${Date.now().toString().slice(-6)}${Math.random().toString(36).substr(2, 3).toUpperCase()}`;
-    setConfirmationId(id);
-  }, []);
+    // Use the confirmation ID from URL params, or generate a new one as fallback
+    if (urlConfirmationId) {
+      setConfirmationId(urlConfirmationId);
+    } else {
+      const id = `STL${Date.now().toString().slice(-6)}${Math.random().toString(36).substr(2, 3).toUpperCase()}`;
+      setConfirmationId(id);
+    }
+  }, [urlConfirmationId]);
 
   if (!event) {
     return (
@@ -81,7 +87,7 @@ export default function ConfirmationPage() {
           </h1>
           
           <p className="text-lg text-gray-300 mb-2">
-            You're all set for an amazing night at {event.clubName}
+            You're all set for an amazing night at {club?.name || 'the venue'}
           </p>
           
           <p className="text-sm text-gray-400">
@@ -102,7 +108,7 @@ export default function ConfirmationPage() {
               
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Venue</span>
-                <span className="text-white font-medium">{event.clubName}</span>
+                <span className="text-white font-medium">{club?.name || 'Unknown Venue'}</span>
               </div>
               
               <div className="flex justify-between items-center">
@@ -111,8 +117,8 @@ export default function ConfirmationPage() {
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="text-gray-400">Arrival Window</span>
-                <span className="text-white font-medium">{event.arrivalWindow}</span>
+                <span className="text-gray-400">Event Time</span>
+                <span className="text-white font-medium">{event.time}</span>
               </div>
               
               <div className="flex justify-between items-center">
@@ -130,7 +136,7 @@ export default function ConfirmationPage() {
               <h3 className="font-semibold text-neon-pink mb-2">✅ What's Included</h3>
               <ul className="text-gray-300 text-sm space-y-1">
                 <li>• VIP Line Access for {partySize} {partySize === 1 ? 'person' : 'people'}</li>
-                <li>• Full Entry to {event.clubName}</li>
+                <li>• Full Entry to {club?.name || 'the venue'}</li>
                 <li>• No Additional Door Fees</li>
                 <li>• Priority Customer Support</li>
               </ul>
@@ -149,9 +155,9 @@ export default function ConfirmationPage() {
                 <div>
                   <h3 className="font-semibold text-white mb-1">Timing</h3>
                   <p className="text-gray-400 text-sm">
-                    Arrive during your window: <span className="text-neon-teal">{event.arrivalWindow}</span>
+                    Event starts at: <span className="text-neon-teal">{event.time}</span>
                     <br />
-                    Late arrivals may not be honored.
+                    Arrive on time for the best experience.
                   </p>
                 </div>
               </div>
@@ -163,7 +169,7 @@ export default function ConfirmationPage() {
                 <div>
                   <h3 className="font-semibold text-white mb-1">Location</h3>
                   <p className="text-gray-400 text-sm">
-                    {event.location}
+                    {club?.location || 'Address not available'}
                     <br />
                     Look for the VIP/Express Line entrance.
                   </p>

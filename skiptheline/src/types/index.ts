@@ -1,17 +1,30 @@
+export interface Club {
+  id: string;
+  name: string;
+  location: string;
+  description: string;
+  imageUrl: string;
+  capacity: number;
+  type: 'nightclub' | 'rooftop' | 'beach' | 'underground';
+  amenities: string[];
+  status: 'active' | 'inactive';
+}
+
 export interface Event {
   id: string;
   title: string;
-  clubName: string;
+  clubId: string; // Changed from clubName to clubId
   date: string;
   time: string;
   price: number;
   description: string;
-  arrivalWindow: string;
+  // Removed arrivalWindow
   maxTickets: number;
   soldTickets: number;
   imageUrl: string;
   status: 'active' | 'sold-out' | 'hidden';
-  location: string;
+  stripePaymentLink: string;
+  availability: number; // Available spots remaining (maxTickets - soldTickets but managed separately)
 }
 
 export interface Purchase {
@@ -23,6 +36,7 @@ export interface Purchase {
   purchaseDate: string;
   status: 'confirmed' | 'used' | 'cancelled';
   totalAmount: number;
+  stripePaymentId?: string;
 }
 
 export interface Admin {
@@ -38,4 +52,29 @@ export interface FAQ {
 export interface Testimonial {
   quote: string;
   author: string;
+}
+
+export interface EventFormData {
+  title: string;
+  clubId: string; // Changed from clubName to clubId
+  date: string;
+  time: string;
+  price: number;
+  description: string;
+  // Removed arrivalWindow
+  maxTickets: number;
+  imageUrl: string;
+  stripePaymentLink: string;
+  availability: number;
+}
+
+export interface GoogleSheetsData {
+  eventName: string;
+  customerName: string;
+  email: string;
+  partySize: number;
+  totalAmount: number;
+  purchaseDate: string;
+  eventDate: string;
+  status: string;
 }
