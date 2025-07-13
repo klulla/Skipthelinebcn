@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Calendar, Clock, MapPin, Star, TrendingUp, Sparkles } from 'lucide-react';
+import { Calendar, Clock, MapPin, Star, TrendingUp, Sparkles, CheckCircle } from 'lucide-react';
 import { Event } from '@/types';
 import { mockClubs } from '@/data/mockData';
 
@@ -16,20 +16,22 @@ export default function EventCard({ event }: EventCardProps) {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    const options: Intl.DateTimeFormatOptions = {
       weekday: 'short',
       month: 'short',
       day: 'numeric'
-    });
+    };
+    return date.toLocaleDateString('en-US', options);
   };
 
   const formatFullDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    const options: Intl.DateTimeFormatOptions = {
       weekday: 'long',
       month: 'long',
       day: 'numeric'
-    });
+    };
+    return date.toLocaleDateString('en-US', options);
   };
 
   const availableTickets = event.availability;
@@ -117,15 +119,9 @@ export default function EventCard({ event }: EventCardProps) {
               <span>VIP Experience</span>
             </div>
 
-            {/* Progress Bar - Show popularity without exact numbers */}
-            <div className="w-full">
-              <div className="text-xs text-gray-500 mb-1">Popularity</div>
-              <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-neon-pink to-neon-teal rounded-full transition-all duration-1000 delay-300"
-                  style={{ width: `${Math.min(soldPercentage, 100)}%` }}
-                />
-              </div>
+            <div className="flex items-center text-gray-400 text-sm">
+              <CheckCircle className="w-4 h-4 mr-3 text-neon-green" />
+              <span>Guaranteed Entry</span>
             </div>
           </div>
         </div>

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Header from '@/components/Header';
-import { mockEvents, faqs, testimonials } from '@/data/mockData';
+import { mockEvents, faqs, testimonials, mockClubs } from '@/data/mockData';
 import { 
   Calendar, 
   Clock, 
@@ -39,8 +39,9 @@ export default function EventPage() {
   const [partySizeError, setPartySizeError] = useState('');
 
   const event = mockEvents.find(e => e.id === params.id);
+  const club = event ? mockClubs.find(c => c.id === event.clubId) : null;
 
-  if (!event) {
+  if (!event || !club) {
     return (
       <div className="min-h-screen bg-background gradient-bg">
         <Header />
@@ -67,12 +68,13 @@ export default function EventPage() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    const options: Intl.DateTimeFormatOptions = {
       weekday: 'long',
       month: 'long',
       day: 'numeric',
       year: 'numeric'
-    });
+    };
+    return date.toLocaleDateString('en-US', options);
   };
 
   const availableTickets = event.availability;
@@ -207,8 +209,8 @@ export default function EventPage() {
                   <div className="flex items-center text-gray-300">
                     <Clock className="w-6 h-6 mr-4 text-neon-teal" />
                     <div>
-                      <div className="font-semibold">{event.arrivalWindow}</div>
-                      <div className="text-sm text-gray-500">Arrival Window</div>
+                      <div className="font-semibold">{event.time}</div>
+                      <div className="text-sm text-gray-500">Event Time</div>
                     </div>
                   </div>
                 </div>
@@ -217,7 +219,7 @@ export default function EventPage() {
                   <div className="flex items-center text-gray-300">
                     <MapPin className="w-6 h-6 mr-4 text-neon-pink" />
                     <div>
-                      <div className="font-semibold">{event.location.split(',')[0]}</div>
+                      <div className="font-semibold">{club.location.split(',')[0]}</div>
                       <div className="text-sm text-gray-500">Venue Location</div>
                     </div>
                   </div>
@@ -232,19 +234,7 @@ export default function EventPage() {
                 </div>
               </div>
 
-              {/* Progress Bar */}
-              <div className="mb-8">
-                <div className="flex justify-between text-sm text-gray-400 mb-2">
-                  <span>Event Popularity</span>
-                  <span>{Math.round(soldPercentage)}% sold</span>
-                </div>
-                <div className="w-full bg-gray-800 rounded-full h-3 overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-neon-pink via-neon-purple to-neon-teal rounded-full transition-all duration-1000"
-                    style={{ width: `${Math.min(soldPercentage, 100)}%` }}
-                  />
-                </div>
-              </div>
+
 
               <div className="p-6 bg-gradient-to-r from-neon-pink/10 to-neon-teal/10 border border-neon-pink/20 rounded-2xl mb-8">
                 <h3 className="font-bold text-neon-pink mb-4 flex items-center">
@@ -488,13 +478,14 @@ export default function EventPage() {
                     </button>
                   </div>
                   
-                  <PaymentForm
-                    amount={totalPrice}
-                    eventId={event.id}
-                    partySize={partySizeNum}
-                    customerInfo={customerInfo}
-                    stripePaymentLink={event.stripePaymentLink}
-                  />
+                              <PaymentForm
+              amount={totalPrice}
+              eventId={event.id}
+              eventTitle={event.title}
+              partySize={partySizeNum}
+              customerInfo={customerInfo}
+              stripePaymentLink={event.stripePaymentLink}
+            />
                 </>
               )}
             </div>
