@@ -23,16 +23,16 @@ export default function HomePage() {
         
         <div className="absolute inset-0 bg-gradient-to-br from-neon-pink/5 via-transparent to-neon-teal/5" />
         
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center">
+        <div className="container-responsive section-spacing text-center">
           <div className="float-animation">
-            <div className="flex justify-center mb-8">
+            <div className="flex justify-center element-spacing">
               <div className="p-6 bg-gradient-to-r from-neon-pink via-neon-purple to-neon-teal rounded-3xl neon-glow-rainbow">
                 <Zap className="w-16 h-16 text-black" />
               </div>
             </div>
           </div>
           
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight">
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black element-spacing leading-tight">
             Skip The Line,
             <br />
             <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-teal bg-clip-text text-transparent text-glow-pink">
@@ -40,13 +40,13 @@ export default function HomePage() {
             </span>
           </h1>
           
-          <p className="text-xl sm:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed font-medium">
+          <p className="text-xl sm:text-2xl text-gray-300 element-spacing max-w-4xl mx-auto leading-relaxed font-medium">
             VIP fast-entry to Barcelona's most exclusive clubs. 
             <br className="hidden sm:block" />
             <span className="text-neon-teal">No guestlist, no waiting</span> — just pure nightlife access.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-16">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 element-spacing">
             <div className="flex items-center text-neon-teal bg-gray-900/50 px-6 py-3 rounded-full glass-effect">
               <Star className="w-6 h-6 mr-3" />
               <span className="font-semibold text-lg">VIP Line Access</span>
@@ -74,8 +74,8 @@ export default function HomePage() {
       </section>
 
       {/* Trust Indicators */}
-      <section className="py-16 border-y border-gray-800/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="section-spacing border-y border-gray-800/50">
+        <div className="container-responsive">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div className="space-y-2">
               <div className="text-3xl font-bold text-neon-pink">1000+</div>
@@ -98,9 +98,9 @@ export default function HomePage() {
       </section>
 
       {/* Events Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6">
+      <section className="container-responsive section-spacing">
+        <div className="text-center element-spacing">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black element-spacing">
             This Weekend's 
             <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-teal bg-clip-text text-transparent">
               {" "}Fast Passes
@@ -112,18 +112,18 @@ export default function HomePage() {
         </div>
 
         {activeEvents.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10">
+          <div className="grid grid-responsive grid-responsive-2">
             {activeEvents.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
           </div>
         ) : (
           <div className="text-center py-16">
-            <div className="p-8 glass-effect rounded-3xl max-w-md mx-auto">
-              <div className="w-20 h-20 bg-gradient-to-r from-neon-pink to-neon-teal rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="card-spacing glass-effect rounded-3xl max-w-md mx-auto">
+              <div className="w-20 h-20 bg-gradient-to-r from-neon-pink to-neon-teal rounded-full flex items-center justify-center mx-auto element-spacing">
                 <Heart className="w-10 h-10 text-black" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-300 mb-4">
+              <h3 className="text-2xl font-bold text-gray-300 element-spacing">
                 No Events Available
               </h3>
               <p className="text-gray-500 text-lg leading-relaxed">
@@ -137,9 +137,9 @@ export default function HomePage() {
 
       {/* How It Works */}
       <section className="bg-gray-950/50 border-y border-gray-800/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl font-black mb-6">
+        <div className="container-responsive section-spacing">
+          <div className="text-center element-spacing">
+            <h2 className="text-4xl sm:text-5xl font-black element-spacing">
               How It Works
             </h2>
             <p className="text-gray-400 text-xl max-w-2xl mx-auto">
@@ -147,9 +147,9 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          <div className="grid grid-responsive md:grid-responsive-3">
             <div className="text-center group">
-              <div className="relative mb-8">
+              <div className="relative element-spacing">
                 <div className="w-24 h-24 bg-gradient-to-br from-neon-pink to-neon-purple rounded-3xl flex items-center justify-center mx-auto neon-glow-pink group-hover:scale-110 transition-all duration-300">
                   <span className="text-3xl font-black text-black">1</span>
                 </div>
@@ -157,14 +157,14 @@ export default function HomePage() {
                   <TrendingUp className="w-4 h-4 text-black" />
                 </div>
               </div>
-              <h3 className="text-2xl font-bold mb-4">Choose Your Event</h3>
+              <h3 className="text-2xl font-bold element-spacing">Choose Your Event</h3>
               <p className="text-gray-400 text-lg leading-relaxed">
                 Browse premium clubs and select your perfect night out experience. Each venue hand-picked for quality.
               </p>
             </div>
 
             <div className="text-center group">
-              <div className="relative mb-8">
+              <div className="relative element-spacing">
                 <div className="w-24 h-24 bg-gradient-to-br from-neon-teal to-neon-green rounded-3xl flex items-center justify-center mx-auto neon-glow-teal group-hover:scale-110 transition-all duration-300">
                   <span className="text-3xl font-black text-black">2</span>
                 </div>
@@ -172,14 +172,14 @@ export default function HomePage() {
                   <Shield className="w-4 h-4 text-black" />
                 </div>
               </div>
-              <h3 className="text-2xl font-bold mb-4">Secure Your Pass</h3>
+              <h3 className="text-2xl font-bold element-spacing">Secure Your Pass</h3>
               <p className="text-gray-400 text-lg leading-relaxed">
                 Quick checkout with instant confirmation and detailed arrival instructions. Payment secured by Stripe.
               </p>
             </div>
 
             <div className="text-center group">
-              <div className="relative mb-8">
+              <div className="relative element-spacing">
                 <div className="w-24 h-24 bg-gradient-to-br from-neon-purple to-neon-pink rounded-3xl flex items-center justify-center mx-auto neon-glow-purple group-hover:scale-110 transition-all duration-300">
                   <span className="text-3xl font-black text-black">3</span>
                 </div>
@@ -187,7 +187,7 @@ export default function HomePage() {
                   <CheckCircle className="w-4 h-4 text-black" />
                 </div>
               </div>
-              <h3 className="text-2xl font-bold mb-4">Walk Right In</h3>
+              <h3 className="text-2xl font-bold element-spacing">Walk Right In</h3>
               <p className="text-gray-400 text-lg leading-relaxed">
                 Skip the general line and enter through the VIP/express entrance. Show your pass and enjoy the night.
               </p>
@@ -197,13 +197,13 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="glass-effect-strong rounded-3xl p-12">
-            <h2 className="text-3xl sm:text-4xl font-black mb-6">
+      <section className="section-spacing">
+        <div className="container-responsive text-center">
+          <div className="glass-effect-strong rounded-3xl card-spacing">
+            <h2 className="text-3xl sm:text-4xl font-black element-spacing">
               Ready to Skip The Line?
             </h2>
-            <p className="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
+            <p className="text-gray-400 text-lg element-spacing max-w-2xl mx-auto">
               Join thousands of smart party-goers who've discovered the secret to Barcelona's best nights out.
             </p>
             <button className="btn-neon px-10 py-4 rounded-2xl font-bold text-lg text-black ripple">
@@ -215,9 +215,9 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="bg-gray-950 border-t border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="container-responsive section-spacing">
           <div className="text-center">
-            <div className="flex items-center justify-center space-x-3 mb-6">
+            <div className="flex items-center justify-center space-x-3 element-spacing">
               <div className="p-3 bg-gradient-to-r from-neon-pink via-neon-purple to-neon-teal rounded-xl">
                 <Zap className="w-8 h-8 text-black" />
               </div>
@@ -225,7 +225,7 @@ export default function HomePage() {
                 SkipTheLine
               </span>
             </div>
-            <p className="text-gray-500 text-lg mb-8">
+            <p className="text-gray-500 text-lg element-spacing">
               Premium nightlife access in Barcelona
             </p>
             <div className="flex items-center justify-center space-x-8 text-sm text-gray-600">

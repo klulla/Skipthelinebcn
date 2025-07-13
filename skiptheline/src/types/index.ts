@@ -12,6 +12,8 @@ export interface Event {
   imageUrl: string;
   status: 'active' | 'sold-out' | 'hidden';
   location: string;
+  stripePaymentLink: string;
+  availability: number; // Available spots remaining (maxTickets - soldTickets but managed separately)
 }
 
 export interface Purchase {
@@ -23,6 +25,7 @@ export interface Purchase {
   purchaseDate: string;
   status: 'confirmed' | 'used' | 'cancelled';
   totalAmount: number;
+  stripePaymentId?: string;
 }
 
 export interface Admin {
@@ -38,4 +41,30 @@ export interface FAQ {
 export interface Testimonial {
   quote: string;
   author: string;
+}
+
+export interface EventFormData {
+  title: string;
+  clubName: string;
+  date: string;
+  time: string;
+  price: number;
+  description: string;
+  arrivalWindow: string;
+  maxTickets: number;
+  imageUrl: string;
+  location: string;
+  stripePaymentLink: string;
+  availability: number;
+}
+
+export interface GoogleSheetsData {
+  eventName: string;
+  customerName: string;
+  email: string;
+  partySize: number;
+  totalAmount: number;
+  purchaseDate: string;
+  eventDate: string;
+  status: string;
 }

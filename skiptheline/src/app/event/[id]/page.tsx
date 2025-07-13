@@ -21,20 +21,22 @@ import {
   Mail,
   User,
   PartyPopper,
-  Heart
+  Heart,
+  AlertCircle
 } from 'lucide-react';
 import PaymentForm from '@/components/PaymentForm';
 
 export default function EventPage() {
   const params = useParams();
   const router = useRouter();
-  const [partySize, setPartySize] = useState(1);
+  const [partySize, setPartySize] = useState('1');
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
   const [showPayment, setShowPayment] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
     email: ''
   });
+  const [partySizeError, setPartySizeError] = useState('');
 
   const event = mockEvents.find(e => e.id === params.id);
 
@@ -42,13 +44,13 @@ export default function EventPage() {
     return (
       <div className="min-h-screen bg-background gradient-bg">
         <Header />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="container-responsive section-spacing">
           <div className="text-center">
-            <div className="w-24 h-24 bg-gradient-to-r from-neon-pink to-neon-teal rounded-full flex items-center justify-center mx-auto mb-8">
+            <div className="w-24 h-24 bg-gradient-to-r from-neon-pink to-neon-teal rounded-full flex items-center justify-center mx-auto element-spacing">
               <Heart className="w-12 h-12 text-black" />
             </div>
-            <h1 className="text-3xl font-black text-gray-300 mb-6">Event Not Found</h1>
-            <p className="text-gray-500 text-lg mb-8">
+            <h1 className="text-3xl font-black text-gray-300 element-spacing">Event Not Found</h1>
+            <p className="text-gray-500 text-lg element-spacing">
               The event you're looking for doesn't exist or has been removed.
             </p>
             <button 
@@ -73,16 +75,49 @@ export default function EventPage() {
     });
   };
 
-  const availableTickets = event.maxTickets - event.soldTickets;
+  const availableTickets = event.availability;
   const isSoldOut = event.status === 'sold-out' || availableTickets <= 0;
-  const totalPrice = event.price * partySize;
-  const soldPercentage = (event.soldTickets / event.maxTickets) * 100;
+  const partySizeNum = parseInt(partySize) || 0;
+  const totalPrice = event.price * partySizeNum;
+  const soldPercentage = ((event.maxTickets - event.availability) / event.maxTickets) * 100;
+
+  const validatePartySize = (value: string): boolean => {
+    const num = parseInt(value);
+    
+    if (!value.trim()) {
+      setPartySizeError('Party size is required');
+      return false;
+    }
+    
+    if (isNaN(num) || num <= 0) {
+      setPartySizeError('Party size must be a positive number');
+      return false;
+    }
+    
+    if (num > availableTickets) {
+      setPartySizeError(`Sorry, only ${availableTickets} spots available`);
+      return false;
+    }
+    
+    setPartySizeError('');
+    return true;
+  };
+
+  const handlePartySizeChange = (value: string) => {
+    setPartySize(value);
+    validatePartySize(value);
+  };
 
   const handlePurchaseClick = () => {
     if (!customerInfo.name || !customerInfo.email) {
       alert('Please fill in your name and email before proceeding to payment.');
       return;
     }
+    
+    if (!validatePartySize(partySize)) {
+      return;
+    }
+    
     setShowPayment(true);
   };
 
@@ -91,7 +126,7 @@ export default function EventPage() {
       <Header />
       
       {/* Back Button */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+      <div className="container-responsive pt-8">
         <button 
           onClick={() => router.push('/')}
           className="flex items-center text-gray-400 hover:text-neon-pink transition-colors mb-8 group"
@@ -121,12 +156,12 @@ export default function EventPage() {
           </div>
           
           <div className="absolute bottom-8 left-0 right-0">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="glass-effect-strong rounded-3xl p-8 mx-4">
+            <div className="container-responsive">
+              <div className="glass-effect-strong rounded-3xl card-spacing mx-4">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white mb-4 text-glow-pink">
                   {event.clubName}
                 </h1>
-                <p className="text-2xl text-neon-pink font-bold mb-6">
+                <p className="text-2xl text-neon-pink font-bold element-spacing">
                   {event.title}
                 </p>
                 <div className="flex flex-wrap items-center gap-6">
@@ -140,7 +175,7 @@ export default function EventPage() {
                   </div>
                   <div className="flex items-center text-gray-300">
                     <Users className="w-5 h-5 mr-3 text-neon-purple" />
-                    <span className="font-medium">{event.soldTickets}/{event.maxTickets} sold</span>
+                    <span className="font-medium">{availableTickets} spots left</span>
                   </div>
                 </div>
               </div>
@@ -149,12 +184,12 @@ export default function EventPage() {
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+      <div className="container-responsive pb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-12">
             {/* Event Details */}
-            <div className="glass-effect-strong rounded-3xl p-8 border border-gray-700/50">
+            <div className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50">
               <h2 className="text-3xl font-black mb-8 bg-gradient-to-r from-neon-pink to-neon-teal bg-clip-text text-transparent">
                 Event Details
               </h2>
@@ -190,8 +225,8 @@ export default function EventPage() {
                   <div className="flex items-center text-gray-300">
                     <Users className="w-6 h-6 mr-4 text-neon-purple" />
                     <div>
-                      <div className="font-semibold">{event.soldTickets}/{event.maxTickets} sold</div>
-                      <div className="text-sm text-gray-500">Capacity</div>
+                      <div className="font-semibold">{availableTickets} available</div>
+                      <div className="text-sm text-gray-500">Spots Remaining</div>
                     </div>
                   </div>
                 </div>
@@ -242,7 +277,7 @@ export default function EventPage() {
             </div>
 
             {/* FAQs */}
-            <div className="glass-effect-strong rounded-3xl p-8 border border-gray-700/50">
+            <div className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50">
               <h2 className="text-3xl font-black mb-8 bg-gradient-to-r from-neon-pink to-neon-teal bg-clip-text text-transparent">
                 Frequently Asked Questions
               </h2>
@@ -273,7 +308,7 @@ export default function EventPage() {
             </div>
 
             {/* Testimonials */}
-            <div className="glass-effect-strong rounded-3xl p-8 border border-gray-700/50">
+            <div className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50">
               <h2 className="text-3xl font-black mb-8 bg-gradient-to-r from-neon-pink to-neon-teal bg-clip-text text-transparent">
                 What Guests Say
               </h2>
@@ -296,7 +331,7 @@ export default function EventPage() {
 
           {/* Purchase Sidebar */}
           <div className="lg:col-span-1">
-            <div className="glass-effect-strong rounded-3xl p-8 border border-gray-700/50 sticky top-28">
+            <div className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50 sticky top-28">
               {!showPayment ? (
                 <>
                   <div className="text-center mb-8">
@@ -351,47 +386,56 @@ export default function EventPage() {
                         </div>
                       </div>
 
-                      {/* Party Size Selector */}
+                      {/* Party Size Input */}
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-4">
-                          Party Size
+                          Party Size (How many people?)
                         </label>
-                        <div className="grid grid-cols-4 gap-3">
-                          {[1, 2, 3, 4].map((size) => (
-                            <button
-                              key={size}
-                              onClick={() => setPartySize(size)}
-                              className={`py-3 px-4 rounded-xl border transition-all font-semibold ${
-                                partySize === size
-                                  ? 'border-neon-pink bg-neon-pink/10 text-neon-pink neon-glow-pink'
-                                  : 'border-gray-600 text-gray-400 hover:border-gray-500 hover:text-gray-300'
-                              }`}
-                            >
-                              {size}
-                            </button>
-                          ))}
+                        <div className="relative">
+                          <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                          <input
+                            type="number"
+                            min="1"
+                            max={availableTickets}
+                            value={partySize}
+                            onChange={(e) => handlePartySizeChange(e.target.value)}
+                            className={`w-full pl-10 pr-4 py-3 bg-gray-800/50 border rounded-xl text-white placeholder-gray-400 focus:ring-1 transition-colors input-glow ${
+                              partySizeError 
+                                ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' 
+                                : 'border-gray-600 focus:border-neon-pink focus:ring-neon-pink/20'
+                            }`}
+                            placeholder="Enter number of people"
+                          />
                         </div>
+                        {partySizeError && (
+                          <p className="text-red-400 text-sm mt-2 flex items-center">
+                            <AlertCircle className="w-4 h-4 mr-1" />
+                            {partySizeError}
+                          </p>
+                        )}
                         <p className="text-xs text-gray-500 mt-2">
-                          Need more? Contact us for custom packages.
+                          Each person counts as one ticket. Max available: {availableTickets}
                         </p>
                       </div>
 
                       {/* Total Price */}
-                      <div className="bg-gray-800/50 rounded-2xl p-6 border border-gray-700/50">
-                        <div className="flex justify-between items-center mb-3">
-                          <span className="text-gray-400">Fast Pass × {partySize}</span>
-                          <span className="text-gray-300 font-semibold">€{totalPrice}</span>
+                      {partySizeNum > 0 && !partySizeError && (
+                        <div className="bg-gray-800/50 rounded-2xl p-6 border border-gray-700/50">
+                          <div className="flex justify-between items-center mb-3">
+                            <span className="text-gray-400">Fast Pass × {partySizeNum}</span>
+                            <span className="text-gray-300 font-semibold">€{totalPrice}</span>
+                          </div>
+                          <div className="flex justify-between items-center font-bold text-xl">
+                            <span className="text-gray-200">Total</span>
+                            <span className="text-transparent bg-gradient-to-r from-neon-pink to-neon-teal bg-clip-text">€{totalPrice}</span>
+                          </div>
                         </div>
-                        <div className="flex justify-between items-center font-bold text-xl">
-                          <span className="text-gray-200">Total</span>
-                          <span className="text-transparent bg-gradient-to-r from-neon-pink to-neon-teal bg-clip-text">€{totalPrice}</span>
-                        </div>
-                      </div>
+                      )}
 
                       {/* Buy Button */}
                       <button
                         onClick={handlePurchaseClick}
-                        disabled={!customerInfo.name || !customerInfo.email}
+                        disabled={!customerInfo.name || !customerInfo.email || !partySizeNum || !!partySizeError}
                         className="w-full btn-neon text-black font-bold py-4 rounded-2xl transition-all duration-300 ripple disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                       >
                         <CreditCard className="w-5 h-5" />
@@ -447,8 +491,9 @@ export default function EventPage() {
                   <PaymentForm
                     amount={totalPrice}
                     eventId={event.id}
-                    partySize={partySize}
+                    partySize={partySizeNum}
                     customerInfo={customerInfo}
+                    stripePaymentLink={event.stripePaymentLink}
                   />
                 </>
               )}

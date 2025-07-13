@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Calendar, Clock, MapPin, Users, Star, TrendingUp, Sparkles } from 'lucide-react';
+import { Calendar, Clock, MapPin, Star, TrendingUp, Sparkles } from 'lucide-react';
 import { Event } from '@/types';
 
 interface EventCardProps {
@@ -27,10 +27,10 @@ export default function EventCard({ event }: EventCardProps) {
     });
   };
 
-  const availableTickets = event.maxTickets - event.soldTickets;
+  const availableTickets = event.availability;
   const isLowStock = availableTickets <= 5;
   const isSoldOut = event.status === 'sold-out' || availableTickets <= 0;
-  const soldPercentage = (event.soldTickets / event.maxTickets) * 100;
+  const soldPercentage = ((event.maxTickets - event.availability) / event.maxTickets) * 100;
 
   return (
     <div className="group relative overflow-hidden rounded-3xl glass-effect-strong hover:border-neon-pink/30 transition-all duration-500 card-hover">
@@ -56,7 +56,7 @@ export default function EventCard({ event }: EventCardProps) {
             <div className="px-4 py-2 bg-yellow-500/90 backdrop-blur-sm text-black text-sm font-bold rounded-full border border-yellow-400/50 neon-glow-pink">
               <div className="flex items-center space-x-2">
                 <TrendingUp className="w-3 h-3" />
-                <span>ONLY {availableTickets} LEFT</span>
+                <span>LIMITED SPOTS</span>
               </div>
             </div>
           ) : (
@@ -91,9 +91,9 @@ export default function EventCard({ event }: EventCardProps) {
       </div>
 
       {/* Event Details Section */}
-      <div className="p-8">
+      <div className="card-spacing">
         {/* Info Grid */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-2 gap-4 element-spacing">
           <div className="space-y-3">
             <div className="flex items-center text-gray-400 text-sm">
               <Clock className="w-4 h-4 mr-3 text-neon-teal" />
@@ -108,12 +108,13 @@ export default function EventCard({ event }: EventCardProps) {
 
           <div className="space-y-3">
             <div className="flex items-center text-gray-400 text-sm">
-              <Users className="w-4 h-4 mr-3 text-neon-purple" />
-              <span>{event.soldTickets}/{event.maxTickets} sold</span>
+              <Star className="w-4 h-4 mr-3 text-neon-purple" />
+              <span>VIP Experience</span>
             </div>
 
-            {/* Progress Bar */}
+            {/* Progress Bar - Show popularity without exact numbers */}
             <div className="w-full">
+              <div className="text-xs text-gray-500 mb-1">Popularity</div>
               <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
                 <div 
                   className="h-full bg-gradient-to-r from-neon-pink to-neon-teal rounded-full transition-all duration-1000 delay-300"
@@ -125,7 +126,7 @@ export default function EventCard({ event }: EventCardProps) {
         </div>
 
         {/* Includes Section */}
-        <div className="mb-6 p-4 bg-gradient-to-r from-neon-pink/5 to-neon-teal/5 border border-neon-pink/20 rounded-2xl">
+        <div className="element-spacing p-4 bg-gradient-to-r from-neon-pink/5 to-neon-teal/5 border border-neon-pink/20 rounded-2xl">
           <div className="flex items-center text-neon-pink text-sm font-semibold mb-2">
             <Sparkles className="w-4 h-4 mr-2" />
             <span>VIP Experience Includes</span>
@@ -166,12 +167,12 @@ export default function EventCard({ event }: EventCardProps) {
           </Link>
         </div>
 
-        {/* Urgency Indicator */}
+        {/* Urgency Indicator - Only show if limited */}
         {!isSoldOut && isLowStock && (
           <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
             <div className="flex items-center text-yellow-400 text-sm font-medium">
               <TrendingUp className="w-4 h-4 mr-2" />
-              <span>High demand - {availableTickets} passes remaining</span>
+              <span>High demand - Limited spots remaining!</span>
             </div>
           </div>
         )}

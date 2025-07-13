@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 :root {
   --background: #0a0a0a;
@@ -20,6 +20,17 @@
   --gray-300: #cccccc;
   --gray-200: #e5e5e5;
   --gray-100: #f5f5f5;
+  
+  /* Spacing system */
+  --spacing-xs: 0.25rem;    /* 4px */
+  --spacing-sm: 0.5rem;     /* 8px */
+  --spacing-md: 1rem;       /* 16px */
+  --spacing-lg: 1.5rem;     /* 24px */
+  --spacing-xl: 2rem;       /* 32px */
+  --spacing-2xl: 3rem;      /* 48px */
+  --spacing-3xl: 4rem;      /* 64px */
+  --spacing-4xl: 6rem;      /* 96px */
+  --spacing-5xl: 8rem;      /* 128px */
 }
 
 @theme inline {
@@ -42,6 +53,20 @@
   --color-gray-200: var(--gray-200);
   --color-gray-100: var(--gray-100);
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  
+  /* Responsive spacing */
+  --space-section-sm: 2rem;     /* 32px mobile */
+  --space-section-md: 3rem;     /* 48px tablet */
+  --space-section-lg: 4rem;     /* 64px desktop */
+  --space-section-xl: 6rem;     /* 96px large desktop */
+  
+  --space-card-sm: 1rem;        /* 16px mobile */
+  --space-card-md: 1.5rem;      /* 24px tablet */
+  --space-card-lg: 2rem;        /* 32px desktop */
+  
+  --space-element-sm: 0.75rem;  /* 12px mobile */
+  --space-element-md: 1rem;     /* 16px tablet */
+  --space-element-lg: 1.25rem;  /* 20px desktop */
 }
 
 * {
@@ -80,6 +105,65 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, var(--neon-teal), var(--neon-pink));
+}
+
+/* Responsive spacing utilities */
+.section-spacing {
+  padding-top: var(--space-section-sm);
+  padding-bottom: var(--space-section-sm);
+}
+
+@media (min-width: 768px) {
+  .section-spacing {
+    padding-top: var(--space-section-md);
+    padding-bottom: var(--space-section-md);
+  }
+}
+
+@media (min-width: 1024px) {
+  .section-spacing {
+    padding-top: var(--space-section-lg);
+    padding-bottom: var(--space-section-lg);
+  }
+}
+
+@media (min-width: 1280px) {
+  .section-spacing {
+    padding-top: var(--space-section-xl);
+    padding-bottom: var(--space-section-xl);
+  }
+}
+
+.card-spacing {
+  padding: var(--space-card-sm);
+}
+
+@media (min-width: 768px) {
+  .card-spacing {
+    padding: var(--space-card-md);
+  }
+}
+
+@media (min-width: 1024px) {
+  .card-spacing {
+    padding: var(--space-card-lg);
+  }
+}
+
+.element-spacing {
+  margin-bottom: var(--space-element-sm);
+}
+
+@media (min-width: 768px) {
+  .element-spacing {
+    margin-bottom: var(--space-element-md);
+  }
+}
+
+@media (min-width: 1024px) {
+  .element-spacing {
+    margin-bottom: var(--space-element-lg);
+  }
 }
 
 /* Enhanced neon glow effects */
@@ -272,6 +356,59 @@ body {
   color: white;
 }
 
+/* Responsive container */
+.container-responsive {
+  width: 100%;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container-responsive {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-responsive {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Grid responsive */
+.grid-responsive {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .grid-responsive {
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .grid-responsive-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-responsive {
+    gap: 2rem;
+  }
+  
+  .grid-responsive-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 /* Mobile optimizations */
 @media (max-width: 768px) {
   .neon-glow-pink,
@@ -284,6 +421,11 @@ body {
   
   .card-hover:hover {
     transform: none;
+  }
+  
+  .section-spacing {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
   }
 }
 
@@ -300,4 +442,29 @@ body {
 .focus-visible:focus {
   outline: 2px solid var(--neon-pink);
   outline-offset: 2px;
+}
+
+/* Stripe Elements styling */
+.StripeElement {
+  background: rgba(26, 26, 26, 0.5);
+  border: 1px solid #404040;
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.StripeElement:focus {
+  border-color: var(--neon-pink);
+  box-shadow: 
+    0 0 0 2px rgba(255, 45, 114, 0.2),
+    0 0 20px rgba(255, 45, 114, 0.1);
+}
+
+.StripeElement--invalid {
+  border-color: #ff6b6b;
+}
+
+.StripeElement--complete {
+  border-color: var(--neon-green);
 }

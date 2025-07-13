@@ -12,9 +12,11 @@ export const mockEvents: Event[] = [
     arrivalWindow: '12:00 AM - 1:30 AM',
     maxTickets: 30,
     soldTickets: 12,
+    availability: 18,
     imageUrl: 'https://images.unsplash.com/photo-1566737236500-c8ac43014a8e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
     status: 'active',
-    location: 'Passeig Marítim de la Barceloneta, 34, Barcelona'
+    location: 'Passeig Marítim de la Barceloneta, 34, Barcelona',
+    stripePaymentLink: 'https://buy.stripe.com/5kQ00k7Zyd4j42x4cL8k801'
   },
   {
     id: 'shoko-friday',
@@ -27,9 +29,11 @@ export const mockEvents: Event[] = [
     arrivalWindow: '11:30 PM - 1:00 AM',
     maxTickets: 25,
     soldTickets: 8,
+    availability: 17,
     imageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
     status: 'active',
-    location: 'Passeig Marítim de la Barceloneta, 36, Barcelona'
+    location: 'Passeig Marítim de la Barceloneta, 36, Barcelona',
+    stripePaymentLink: 'https://buy.stripe.com/5kQ00k7Zyd4j42x4cL8k801'
   }
 ];
 
@@ -88,7 +92,8 @@ export const mockPurchases: Purchase[] = [
     partySize: 2,
     purchaseDate: '2024-01-15T10:30:00Z',
     status: 'confirmed',
-    totalAmount: 90
+    totalAmount: 90,
+    stripePaymentId: 'pi_test_1234567890'
   },
   {
     id: 'purchase-2',
@@ -98,7 +103,8 @@ export const mockPurchases: Purchase[] = [
     partySize: 4,
     purchaseDate: '2024-01-14T16:45:00Z',
     status: 'confirmed',
-    totalAmount: 160
+    totalAmount: 160,
+    stripePaymentId: 'pi_test_0987654321'
   }
 ];
 

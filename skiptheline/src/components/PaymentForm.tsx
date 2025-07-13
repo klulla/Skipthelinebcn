@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CreditCard, Lock, Shield, CheckCircle, AlertCircle, Loader } from 'lucide-react';
+import { ExternalLink, Shield, CheckCircle, AlertCircle, Loader, Mail, FileSpreadsheet } from 'lucide-react';
 
 interface PaymentFormProps {
   amount: number;
@@ -12,38 +12,82 @@ interface PaymentFormProps {
     name: string;
     email: string;
   };
+  stripePaymentLink: string;
 }
 
-export default function PaymentForm({ amount, eventId, partySize, customerInfo }: PaymentFormProps) {
+export default function PaymentForm({ amount, eventId, partySize, customerInfo, stripePaymentLink }: PaymentFormProps) {
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentError, setPaymentError] = useState<string | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 
-  // Mock payment processing for demo purposes
-  const handlePayment = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Mock function to save to Google Sheets
+  const saveToGoogleSheets = async (purchaseData: any) => {
+    // This would integrate with Google Sheets API
+    console.log('Saving to Google Sheets:', purchaseData);
+    // Placeholder for Google Sheets integration
+    return new Promise(resolve => setTimeout(resolve, 500));
+  };
+
+  // Mock function to send confirmation email
+  const sendConfirmationEmail = async (customerData: any) => {
+    // This would integrate with email service (SendGrid, Nodemailer, etc.)
+    console.log('Sending confirmation email:', customerData);
+    // Placeholder for email service integration
+    return new Promise(resolve => setTimeout(resolve, 500));
+  };
+
+  // Handle payment completion (this would be called via webhook in real implementation)
+  const handlePaymentSuccess = async () => {
     setIsProcessing(true);
-    setPaymentError(null);
 
     try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // For demo purposes, we'll just simulate success
-      // In a real app, you would integrate with Stripe here
+      const purchaseData = {
+        eventId,
+        customerName: customerInfo.name,
+        email: customerInfo.email,
+        partySize,
+        totalAmount: amount,
+        purchaseDate: new Date().toISOString(),
+        status: 'confirmed'
+      };
+
+      // Save to Google Sheets
+      await saveToGoogleSheets(purchaseData);
+
+      // Send confirmation email
+      await sendConfirmationEmail({
+        ...purchaseData,
+        eventName: 'Event Name' // Would get from event data
+      });
+
       setPaymentSuccess(true);
       
       // Redirect to confirmation after success
       setTimeout(() => {
         router.push(`/confirmation?event=${eventId}&party=${partySize}&total=${amount}&name=${encodeURIComponent(customerInfo.name)}&email=${encodeURIComponent(customerInfo.email)}`);
-      }, 1500);
+      }, 2000);
       
     } catch (error) {
-      setPaymentError('Payment failed. Please try again.');
+      console.error('Error processing payment success:', error);
+      // Handle error appropriately
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  // Construct Stripe payment link with prefilled data
+  const constructStripeUrl = () => {
+    const url = new URL(stripePaymentLink);
+    
+    // Add prefilled data to Stripe payment link
+    if (customerInfo.email) {
+      url.searchParams.set('prefilled_email', customerInfo.email);
+    }
+    
+    // For quantity, we'll need to handle this in the payment link setup
+    // or use Stripe's quantity parameter if supported
+    
+    return url.toString();
   };
 
   if (paymentSuccess) {
@@ -53,9 +97,16 @@ export default function PaymentForm({ amount, eventId, partySize, customerInfo }
           <CheckCircle className="w-10 h-10 text-black" />
         </div>
         <h3 className="text-2xl font-bold text-neon-green mb-4">Payment Successful!</h3>
-        <p className="text-gray-400 mb-6">Redirecting to your confirmation...</p>
-        <div className="flex justify-center">
-          <div className="spinner"></div>
+        <p className="text-gray-400 mb-6">Processing your order and sending confirmation...</p>
+        <div className="flex justify-center items-center space-x-4 text-sm text-gray-500">
+          <div className="flex items-center">
+            <FileSpreadsheet className="w-4 h-4 mr-2" />
+            <span>Saving to database</span>
+          </div>
+          <div className="flex items-center">
+            <Mail className="w-4 h-4 mr-2" />
+            <span>Sending confirmation</span>
+          </div>
         </div>
       </div>
     );
@@ -69,7 +120,7 @@ export default function PaymentForm({ amount, eventId, partySize, customerInfo }
       </div>
 
       {/* Order Summary */}
-      <div className="bg-gray-800/50 rounded-2xl p-6 border border-gray-700/50">
+      <div className="glass-effect-strong rounded-2xl p-6 border border-gray-700/50">
         <h4 className="font-semibold text-gray-200 mb-4">Order Summary</h4>
         <div className="space-y-3">
           <div className="flex justify-between text-sm">
@@ -93,95 +144,24 @@ export default function PaymentForm({ amount, eventId, partySize, customerInfo }
         </div>
       </div>
 
-      {/* Payment Form */}
-      <form onSubmit={handlePayment} className="space-y-6">
-        {/* Card Number */}
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Card Number
-          </label>
-          <div className="relative">
-            <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="1234 5678 9012 3456"
-              className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-neon-pink focus:ring-1 focus:ring-neon-pink transition-colors input-glow"
-              required
-            />
-          </div>
-        </div>
-
-        {/* Expiry and CVC */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Expiry Date
-            </label>
-            <input
-              type="text"
-              placeholder="MM/YY"
-              className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-neon-pink focus:ring-1 focus:ring-neon-pink transition-colors input-glow"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              CVC
-            </label>
-            <input
-              type="text"
-              placeholder="123"
-              className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-neon-pink focus:ring-1 focus:ring-neon-pink transition-colors input-glow"
-              required
-            />
-          </div>
-        </div>
-
-        {/* Billing Address */}
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Billing Address
-          </label>
-          <input
-            type="text"
-            placeholder="Street address"
-            className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-neon-pink focus:ring-1 focus:ring-neon-pink transition-colors input-glow"
-            required
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <input
-              type="text"
-              placeholder="City"
-              className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-neon-pink focus:ring-1 focus:ring-neon-pink transition-colors input-glow"
-              required
-            />
-          </div>
-          <div>
-            <input
-              type="text"
-              placeholder="Postal Code"
-              className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-neon-pink focus:ring-1 focus:ring-neon-pink transition-colors input-glow"
-              required
-            />
-          </div>
-        </div>
-
-        {/* Error Message */}
-        {paymentError && (
-          <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center text-red-400">
-            <AlertCircle className="w-5 h-5 mr-3" />
-            <span>{paymentError}</span>
-          </div>
-        )}
-
-        {/* Payment Button */}
+      {/* Stripe Payment Button */}
+      <div className="space-y-4">
+        <a
+          href={constructStripeUrl()}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full btn-neon text-black font-bold py-4 rounded-2xl transition-all duration-300 ripple flex items-center justify-center space-x-3 no-underline"
+        >
+          <Shield className="w-5 h-5" />
+          <span>Pay €{amount} with Stripe</span>
+          <ExternalLink className="w-5 h-5" />
+        </a>
+        
+        {/* Demo Success Button */}
         <button
-          type="submit"
+          onClick={handlePaymentSuccess}
           disabled={isProcessing}
-          className="w-full btn-neon text-black font-bold py-4 rounded-2xl transition-all duration-300 ripple disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+          className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-2xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
         >
           {isProcessing ? (
             <>
@@ -190,29 +170,49 @@ export default function PaymentForm({ amount, eventId, partySize, customerInfo }
             </>
           ) : (
             <>
-              <Lock className="w-5 h-5" />
-              <span>Pay €{amount} Securely</span>
+              <CheckCircle className="w-5 h-5" />
+              <span>Demo: Simulate Payment Success</span>
             </>
           )}
         </button>
+      </div>
 
-        {/* Security Notice */}
-        <div className="text-center">
-          <div className="flex items-center justify-center space-x-6 text-xs text-gray-500 mb-4">
-            <div className="flex items-center">
-              <Shield className="w-4 h-4 mr-2" />
-              <span>256-bit SSL</span>
-            </div>
-            <div className="flex items-center">
-              <Lock className="w-4 h-4 mr-2" />
-              <span>PCI Compliant</span>
+      {/* Payment Instructions */}
+      <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-6">
+        <div className="flex items-start space-x-3">
+          <AlertCircle className="w-6 h-6 text-blue-400 mt-0.5" />
+          <div>
+            <h4 className="font-semibold text-blue-400 mb-2">Payment Instructions</h4>
+            <div className="text-gray-300 text-sm space-y-2">
+              <p>1. Click "Pay with Stripe" to open the secure payment page</p>
+              <p>2. Complete your payment using your preferred method</p>
+              <p>3. You'll receive an instant confirmation email</p>
+              <p>4. Show your confirmation at the venue for VIP entry</p>
             </div>
           </div>
-          <p className="text-xs text-gray-500">
-            Your payment information is secure and encrypted. This is a demo - no real payment will be processed.
-          </p>
         </div>
-      </form>
+      </div>
+
+      {/* Security Notice */}
+      <div className="text-center">
+        <div className="flex items-center justify-center space-x-6 text-xs text-gray-500 mb-4">
+          <div className="flex items-center">
+            <Shield className="w-4 h-4 mr-2" />
+            <span>256-bit SSL</span>
+          </div>
+          <div className="flex items-center">
+            <CheckCircle className="w-4 h-4 mr-2" />
+            <span>PCI Compliant</span>
+          </div>
+          <div className="flex items-center">
+            <ExternalLink className="w-4 h-4 mr-2" />
+            <span>Stripe Secure</span>
+          </div>
+        </div>
+        <p className="text-xs text-gray-500">
+          Your payment is processed securely by Stripe. We never store your payment information.
+        </p>
+      </div>
     </div>
   );
 }

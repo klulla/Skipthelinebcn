@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
+import EventForm from '@/components/EventForm';
 import { mockEvents, mockPurchases, adminCredentials } from '@/data/mockData';
-import { Event, Purchase } from '@/types';
+import { Event, Purchase, EventFormData } from '@/types';
 import { 
   Lock, 
   Eye, 
@@ -71,6 +72,30 @@ export default function AdminPage() {
     setLoginForm({ username: '', password: '' });
   };
 
+  const handleCreateEvent = (eventData: EventFormData) => {
+    const newEvent: Event = {
+      id: `event-${Date.now()}`,
+      ...eventData,
+      soldTickets: 0,
+      status: 'active'
+    };
+    
+    setEvents(prev => [...prev, newEvent]);
+    setShowEventForm(false);
+  };
+
+  const handleEditEvent = (eventData: EventFormData) => {
+    if (editingEvent) {
+      setEvents(prev => prev.map(event => 
+        event.id === editingEvent.id 
+          ? { ...event, ...eventData }
+          : event
+      ));
+      setEditingEvent(null);
+      setShowEventForm(false);
+    }
+  };
+
   const toggleEventStatus = (eventId: string) => {
     setEvents(prev => prev.map(event => 
       event.id === eventId 
@@ -88,6 +113,7 @@ export default function AdminPage() {
 
   const exportGuestList = (eventId: string) => {
     const eventPurchases = purchases.filter(p => p.eventId === eventId);
+    const event = events.find(e => e.id === eventId);
     const csvContent = [
       'Guest Name,Email,Party Size,Purchase Date,Total Amount,Status',
       ...eventPurchases.map(p => 
@@ -99,7 +125,7 @@ export default function AdminPage() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `guest-list-${eventId}.csv`;
+    a.download = `guest-list-${event?.title || eventId}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -127,9 +153,9 @@ export default function AdminPage() {
       <div className="min-h-screen bg-background gradient-bg">
         <Header />
         
-        <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center px-4">
+        <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center p-4">
           <div className="max-w-lg w-full">
-            <div className="glass-effect-strong rounded-3xl p-10 border border-gray-700/50">
+            <div className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50">
               <div className="text-center mb-10">
                 <div className="p-6 bg-gradient-to-r from-neon-pink via-neon-purple to-neon-teal rounded-2xl w-fit mx-auto mb-6 neon-glow-rainbow">
                   <Lock className="w-10 h-10 text-black" />
@@ -183,17 +209,6 @@ export default function AdminPage() {
                   Access Dashboard
                 </button>
               </form>
-
-              <div className="mt-8 p-6 bg-gray-800/30 rounded-2xl border border-gray-700/30">
-                <div className="flex items-center mb-3">
-                  <Shield className="w-4 h-4 mr-2 text-neon-teal" />
-                  <p className="text-sm font-semibold text-gray-300">Demo Credentials</p>
-                </div>
-                <div className="space-y-1 text-sm">
-                  <p className="text-gray-400">Username: <span className="text-white font-mono">admin</span></p>
-                  <p className="text-gray-400">Password: <span className="text-white font-mono">skiptheline2024</span></p>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -205,9 +220,9 @@ export default function AdminPage() {
     <div className="min-h-screen bg-background gradient-bg">
       <Header />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="container-responsive section-spacing">
         {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-12">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between element-spacing">
           <div>
             <h1 className="text-4xl font-black mb-3 bg-gradient-to-r from-neon-pink via-neon-purple to-neon-teal bg-clip-text text-transparent">
               Admin Dashboard
@@ -233,7 +248,7 @@ export default function AdminPage() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex flex-wrap space-x-2 mb-10 glass-effect-strong p-2 rounded-2xl w-fit border border-gray-700/50">
+        <div className="flex flex-wrap space-x-2 element-spacing glass-effect-strong p-2 rounded-2xl w-fit border border-gray-700/50">
           {[
             { key: 'overview', label: 'Overview', icon: BarChart3 },
             { key: 'events', label: 'Events', icon: Calendar },
@@ -262,8 +277,8 @@ export default function AdminPage() {
         {selectedTab === 'overview' && (
           <div className="space-y-10">
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="glass-effect-strong rounded-2xl p-6 border border-gray-700/50 card-hover">
+            <div className="grid grid-responsive grid-responsive-2 lg:grid-responsive-4">
+              <div className="glass-effect-strong rounded-2xl card-spacing border border-gray-700/50 card-hover">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-gray-400 text-sm font-medium mb-1">Total Revenue</p>
@@ -276,7 +291,7 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              <div className="glass-effect-strong rounded-2xl p-6 border border-gray-700/50 card-hover">
+              <div className="glass-effect-strong rounded-2xl card-spacing border border-gray-700/50 card-hover">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-gray-400 text-sm font-medium mb-1">Tickets Sold</p>
@@ -289,7 +304,7 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              <div className="glass-effect-strong rounded-2xl p-6 border border-gray-700/50 card-hover">
+              <div className="glass-effect-strong rounded-2xl card-spacing border border-gray-700/50 card-hover">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-gray-400 text-sm font-medium mb-1">Active Events</p>
@@ -302,7 +317,7 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              <div className="glass-effect-strong rounded-2xl p-6 border border-gray-700/50 card-hover">
+              <div className="glass-effect-strong rounded-2xl card-spacing border border-gray-700/50 card-hover">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-gray-400 text-sm font-medium mb-1">Today's Sales</p>
@@ -317,7 +332,7 @@ export default function AdminPage() {
             </div>
 
             {/* Recent Activity */}
-            <div className="glass-effect-strong rounded-3xl p-8 border border-gray-700/50">
+            <div className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50">
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-black text-white">Recent Purchases</h2>
                 <div className="flex items-center space-x-2">
@@ -383,7 +398,10 @@ export default function AdminPage() {
               </div>
               
               <button
-                onClick={() => setShowEventForm(true)}
+                onClick={() => {
+                  setEditingEvent(null);
+                  setShowEventForm(true);
+                }}
                 className="btn-neon px-6 py-3 rounded-2xl font-bold text-black ripple flex items-center space-x-2"
               >
                 <Plus className="w-5 h-5" />
@@ -391,11 +409,11 @@ export default function AdminPage() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-responsive grid-responsive-2 xl:grid-responsive-3">
               {filteredEvents.map((event) => {
-                const soldPercentage = (event.soldTickets / event.maxTickets) * 100;
+                const soldPercentage = ((event.maxTickets - event.availability) / event.maxTickets) * 100;
                 return (
-                  <div key={event.id} className="glass-effect-strong rounded-3xl p-6 border border-gray-700/50 card-hover">
+                  <div key={event.id} className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50 card-hover">
                     <div className="flex justify-between items-start mb-6">
                       <div className="flex-1">
                         <h3 className="text-xl font-bold text-white mb-2">{event.title}</h3>
@@ -419,7 +437,10 @@ export default function AdminPage() {
                         </button>
                         
                         <button
-                          onClick={() => setEditingEvent(event)}
+                          onClick={() => {
+                            setEditingEvent(event);
+                            setShowEventForm(true);
+                          }}
                           className="p-2 bg-neon-teal/10 text-neon-teal rounded-lg hover:bg-neon-teal/20 transition-colors"
                         >
                           <Edit3 className="w-4 h-4" />
@@ -441,8 +462,8 @@ export default function AdminPage() {
                       </div>
                       
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Sold</span>
-                        <span className="text-white font-semibold">{event.soldTickets}/{event.maxTickets}</span>
+                        <span className="text-gray-400">Available</span>
+                        <span className="text-white font-semibold">{event.availability}/{event.maxTickets}</span>
                       </div>
 
                       {/* Progress Bar */}
@@ -491,7 +512,7 @@ export default function AdminPage() {
           <div className="space-y-8">
             <h2 className="text-3xl font-black text-white">Sales Overview</h2>
             
-            <div className="glass-effect-strong rounded-3xl p-8 border border-gray-700/50">
+            <div className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
@@ -545,8 +566,8 @@ export default function AdminPage() {
           <div className="space-y-8">
             <h2 className="text-3xl font-black text-white">Analytics Dashboard</h2>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="glass-effect-strong rounded-3xl p-8 border border-gray-700/50">
+            <div className="grid grid-responsive grid-responsive-2">
+              <div className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50">
                 <h3 className="text-xl font-bold text-white mb-6">Revenue Trends</h3>
                 <div className="text-center py-12">
                   <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -554,7 +575,7 @@ export default function AdminPage() {
                 </div>
               </div>
               
-              <div className="glass-effect-strong rounded-3xl p-8 border border-gray-700/50">
+              <div className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50">
                 <h3 className="text-xl font-bold text-white mb-6">Popular Events</h3>
                 <div className="space-y-4">
                   {events.map((event, index) => (
@@ -565,7 +586,7 @@ export default function AdminPage() {
                         </div>
                         <span className="text-white font-medium">{event.title}</span>
                       </div>
-                      <span className="text-gray-400">{event.soldTickets} sold</span>
+                      <span className="text-gray-400">{event.maxTickets - event.availability} sold</span>
                     </div>
                   ))}
                 </div>
@@ -574,6 +595,19 @@ export default function AdminPage() {
           </div>
         )}
       </div>
+
+      {/* Event Form Modal */}
+      {showEventForm && (
+        <EventForm
+          event={editingEvent}
+          onSave={editingEvent ? handleEditEvent : handleCreateEvent}
+          onCancel={() => {
+            setShowEventForm(false);
+            setEditingEvent(null);
+          }}
+          isEditing={!!editingEvent}
+        />
+      )}
     </div>
   );
 }

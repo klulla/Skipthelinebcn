@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Zap, Menu, X, Shield, Users, Star } from 'lucide-react';
+import { Zap, Menu, X, Shield, Star } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Header() {
@@ -9,7 +9,7 @@ export default function Header() {
 
   return (
     <header className="glass-effect-strong border-b border-gray-700/50 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container-responsive">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group">
@@ -38,13 +38,6 @@ export default function Header() {
               <Shield className="w-4 h-4 text-neon-green" />
               <span>Secure • Instant • Guaranteed</span>
             </div>
-            
-            <Link 
-              href="/admin" 
-              className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white transition-all rounded-xl text-sm font-medium border border-gray-700 hover:border-gray-600"
-            >
-              Admin
-            </Link>
           </nav>
 
           {/* Mobile Menu Button */}
@@ -73,14 +66,6 @@ export default function Header() {
                 <Shield className="w-4 h-4 text-neon-green" />
                 <span>Secure • Instant • Guaranteed</span>
               </div>
-              
-              <Link 
-                href="/admin" 
-                className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white transition-all rounded-xl text-sm font-medium border border-gray-700 w-fit"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Admin Access
-              </Link>
             </div>
           </div>
         )}
