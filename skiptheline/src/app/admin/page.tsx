@@ -19,7 +19,18 @@ import {
   Euro,
   ToggleLeft,
   ToggleRight,
-  LogOut
+  LogOut,
+  Shield,
+  Activity,
+  BarChart3,
+  Clock,
+  Star,
+  AlertCircle,
+  CheckCircle,
+  Settings,
+  Search,
+  Filter,
+  RefreshCcw
 } from 'lucide-react';
 
 export default function AdminPage() {
@@ -29,11 +40,13 @@ export default function AdminPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [events, setEvents] = useState<Event[]>(mockEvents);
   const [purchases, setPurchases] = useState<Purchase[]>(mockPurchases);
-  const [selectedTab, setSelectedTab] = useState<'overview' | 'events' | 'sales'>('overview');
+  const [selectedTab, setSelectedTab] = useState<'overview' | 'events' | 'sales' | 'analytics'>('overview');
   const [showEventForm, setShowEventForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'hidden' | 'sold-out'>('all');
 
-  // Check if user is already logged in (in a real app, this would check JWT or session)
+  // Check if user is already logged in
   useEffect(() => {
     const isAuthenticated = localStorage.getItem('adminLoggedIn') === 'true';
     setIsLoggedIn(isAuthenticated);
@@ -91,43 +104,58 @@ export default function AdminPage() {
     window.URL.revokeObjectURL(url);
   };
 
-  // Calculate overview stats
+  // Calculate stats
   const totalRevenue = purchases.reduce((sum, p) => sum + p.totalAmount, 0);
   const totalTicketsSold = purchases.reduce((sum, p) => sum + p.partySize, 0);
   const activeEvents = events.filter(e => e.status === 'active').length;
+  const todayPurchases = purchases.filter(p => {
+    const today = new Date().toDateString();
+    const purchaseDate = new Date(p.purchaseDate).toDateString();
+    return today === purchaseDate;
+  }).length;
+
+  // Filter events
+  const filteredEvents = events.filter(event => {
+    const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         event.clubName.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter = filterStatus === 'all' || event.status === filterStatus;
+    return matchesSearch && matchesFilter;
+  });
 
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background gradient-bg">
         <Header />
         
-        <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4">
-          <div className="max-w-md w-full">
-            <div className="bg-gray-900 rounded-2xl p-8 border border-gray-800">
-              <div className="text-center mb-8">
-                <div className="p-4 bg-neon-pink rounded-full w-fit mx-auto mb-4">
-                  <Lock className="w-8 h-8 text-black" />
+        <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center px-4">
+          <div className="max-w-lg w-full">
+            <div className="glass-effect-strong rounded-3xl p-10 border border-gray-700/50">
+              <div className="text-center mb-10">
+                <div className="p-6 bg-gradient-to-r from-neon-pink via-neon-purple to-neon-teal rounded-2xl w-fit mx-auto mb-6 neon-glow-rainbow">
+                  <Lock className="w-10 h-10 text-black" />
                 </div>
-                <h1 className="text-2xl font-bold mb-2">Admin Login</h1>
-                <p className="text-gray-400">Secure access to SkipTheLine dashboard</p>
+                <h1 className="text-3xl font-black mb-3 bg-gradient-to-r from-neon-pink to-neon-teal bg-clip-text text-transparent">
+                  Admin Portal
+                </h1>
+                <p className="text-gray-400 text-lg">Secure access to SkipTheLine dashboard</p>
               </div>
 
               <form onSubmit={handleLogin} className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-semibold text-gray-300 mb-3">
                     Username
                   </label>
                   <input
                     type="text"
                     value={loginForm.username}
                     onChange={(e) => setLoginForm(prev => ({ ...prev, username: e.target.value }))}
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:border-neon-pink focus:outline-none text-white"
+                    className="w-full px-4 py-4 bg-gray-800/50 border border-gray-600 rounded-2xl focus:border-neon-pink focus:outline-none text-white transition-colors input-glow"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-semibold text-gray-300 mb-3">
                     Password
                   </label>
                   <div className="relative">
@@ -135,13 +163,13 @@ export default function AdminPage() {
                       type={showPassword ? 'text' : 'password'}
                       value={loginForm.password}
                       onChange={(e) => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
-                      className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:border-neon-pink focus:outline-none text-white pr-12"
+                      className="w-full px-4 py-4 bg-gray-800/50 border border-gray-600 rounded-2xl focus:border-neon-pink focus:outline-none text-white pr-12 transition-colors input-glow"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300"
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300"
                     >
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
@@ -150,16 +178,21 @@ export default function AdminPage() {
 
                 <button
                   type="submit"
-                  className="w-full bg-neon-pink text-black font-bold py-3 rounded-lg hover:bg-neon-pink/90 transition-colors"
+                  className="w-full btn-neon text-black font-bold py-4 rounded-2xl transition-all duration-300 ripple"
                 >
-                  Login
+                  Access Dashboard
                 </button>
               </form>
 
-              <div className="mt-6 p-4 bg-gray-800 rounded-lg">
-                <p className="text-xs text-gray-400 mb-2">Demo Credentials:</p>
-                <p className="text-xs text-gray-300">Username: admin</p>
-                <p className="text-xs text-gray-300">Password: skiptheline2024</p>
+              <div className="mt-8 p-6 bg-gray-800/30 rounded-2xl border border-gray-700/30">
+                <div className="flex items-center mb-3">
+                  <Shield className="w-4 h-4 mr-2 text-neon-teal" />
+                  <p className="text-sm font-semibold text-gray-300">Demo Credentials</p>
+                </div>
+                <div className="space-y-1 text-sm">
+                  <p className="text-gray-400">Username: <span className="text-white font-mono">admin</span></p>
+                  <p className="text-gray-400">Password: <span className="text-white font-mono">skiptheline2024</span></p>
+                </div>
               </div>
             </div>
           </div>
@@ -169,109 +202,145 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background gradient-bg">
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-12">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
-            <p className="text-gray-400">Manage events and track sales</p>
+            <h1 className="text-4xl font-black mb-3 bg-gradient-to-r from-neon-pink via-neon-purple to-neon-teal bg-clip-text text-transparent">
+              Admin Dashboard
+            </h1>
+            <p className="text-gray-400 text-lg">Manage events, track sales, and monitor performance</p>
           </div>
           
-          <button
-            onClick={handleLogout}
-            className="flex items-center px-4 py-2 text-gray-400 hover:text-red-400 transition-colors mt-4 sm:mt-0"
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Logout
-          </button>
+          <div className="flex items-center space-x-4 mt-6 lg:mt-0">
+            <button className="p-3 glass-effect rounded-xl border border-gray-700/50 hover:border-neon-teal/30 transition-colors">
+              <RefreshCcw className="w-5 h-5 text-gray-400" />
+            </button>
+            <button className="p-3 glass-effect rounded-xl border border-gray-700/50 hover:border-neon-pink/30 transition-colors">
+              <Settings className="w-5 h-5 text-gray-400" />
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center px-6 py-3 glass-effect rounded-xl border border-gray-700/50 text-gray-300 hover:text-red-400 hover:border-red-400/30 transition-all"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              <span className="font-semibold">Logout</span>
+            </button>
+          </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex space-x-1 mb-8 bg-gray-900 p-1 rounded-lg w-fit">
+        <div className="flex flex-wrap space-x-2 mb-10 glass-effect-strong p-2 rounded-2xl w-fit border border-gray-700/50">
           {[
-            { key: 'overview', label: 'Overview' },
-            { key: 'events', label: 'Events' },
-            { key: 'sales', label: 'Sales' }
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setSelectedTab(tab.key as any)}
-              className={`px-6 py-2 rounded-md font-medium transition-colors ${
-                selectedTab === tab.key
-                  ? 'bg-neon-pink text-black'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+            { key: 'overview', label: 'Overview', icon: BarChart3 },
+            { key: 'events', label: 'Events', icon: Calendar },
+            { key: 'sales', label: 'Sales', icon: Users },
+            { key: 'analytics', label: 'Analytics', icon: TrendingUp }
+          ].map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setSelectedTab(tab.key as any)}
+                className={`flex items-center px-6 py-3 rounded-xl font-semibold transition-all ${
+                  selectedTab === tab.key
+                    ? 'btn-neon text-black'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
+                }`}
+              >
+                <Icon className="w-4 h-4 mr-2" />
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Overview Tab */}
         {selectedTab === 'overview' && (
-          <div className="space-y-8">
+          <div className="space-y-10">
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="glass-effect-strong rounded-2xl p-6 border border-gray-700/50 card-hover">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-400 text-sm">Total Revenue</p>
-                    <p className="text-2xl font-bold text-neon-pink">€{totalRevenue}</p>
+                    <p className="text-gray-400 text-sm font-medium mb-1">Total Revenue</p>
+                    <p className="text-3xl font-black text-neon-pink">€{totalRevenue.toLocaleString()}</p>
+                    <p className="text-xs text-green-400 mt-1">↑ 12% from last month</p>
                   </div>
-                  <Euro className="w-8 h-8 text-neon-pink" />
+                  <div className="p-3 bg-neon-pink/10 rounded-xl">
+                    <Euro className="w-8 h-8 text-neon-pink" />
+                  </div>
                 </div>
               </div>
 
-              <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
+              <div className="glass-effect-strong rounded-2xl p-6 border border-gray-700/50 card-hover">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-400 text-sm">Tickets Sold</p>
-                    <p className="text-2xl font-bold text-neon-teal">{totalTicketsSold}</p>
+                    <p className="text-gray-400 text-sm font-medium mb-1">Tickets Sold</p>
+                    <p className="text-3xl font-black text-neon-teal">{totalTicketsSold}</p>
+                    <p className="text-xs text-green-400 mt-1">↑ 8% from last week</p>
                   </div>
-                  <Users className="w-8 h-8 text-neon-teal" />
+                  <div className="p-3 bg-neon-teal/10 rounded-xl">
+                    <Users className="w-8 h-8 text-neon-teal" />
+                  </div>
                 </div>
               </div>
 
-              <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
+              <div className="glass-effect-strong rounded-2xl p-6 border border-gray-700/50 card-hover">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-400 text-sm">Active Events</p>
-                    <p className="text-2xl font-bold text-green-400">{activeEvents}</p>
+                    <p className="text-gray-400 text-sm font-medium mb-1">Active Events</p>
+                    <p className="text-3xl font-black text-neon-green">{activeEvents}</p>
+                    <p className="text-xs text-yellow-400 mt-1">2 ending soon</p>
                   </div>
-                  <Calendar className="w-8 h-8 text-green-400" />
+                  <div className="p-3 bg-neon-green/10 rounded-xl">
+                    <Calendar className="w-8 h-8 text-neon-green" />
+                  </div>
                 </div>
               </div>
 
-              <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
+              <div className="glass-effect-strong rounded-2xl p-6 border border-gray-700/50 card-hover">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-400 text-sm">Avg. Price</p>
-                    <p className="text-2xl font-bold text-yellow-400">
-                      €{totalTicketsSold > 0 ? Math.round(totalRevenue / totalTicketsSold) : 0}
-                    </p>
+                    <p className="text-gray-400 text-sm font-medium mb-1">Today's Sales</p>
+                    <p className="text-3xl font-black text-neon-purple">{todayPurchases}</p>
+                    <p className="text-xs text-green-400 mt-1">New record!</p>
                   </div>
-                  <TrendingUp className="w-8 h-8 text-yellow-400" />
+                  <div className="p-3 bg-neon-purple/10 rounded-xl">
+                    <Activity className="w-8 h-8 text-neon-purple" />
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Recent Activity */}
-            <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
-              <h2 className="text-xl font-bold mb-4">Recent Purchases</h2>
+            <div className="glass-effect-strong rounded-3xl p-8 border border-gray-700/50">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-2xl font-black text-white">Recent Purchases</h2>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-neon-green rounded-full animate-pulse"></div>
+                  <span className="text-sm text-gray-400">Live updates</span>
+                </div>
+              </div>
               <div className="space-y-4">
-                {purchases.slice(0, 5).map((purchase) => {
+                {purchases.slice(0, 5).map((purchase, index) => {
                   const event = events.find(e => e.id === purchase.eventId);
                   return (
-                    <div key={purchase.id} className="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
-                      <div>
-                        <p className="font-medium text-white">{purchase.guestName}</p>
-                        <p className="text-sm text-gray-400">{event?.title} • {purchase.partySize} people</p>
+                    <div key={purchase.id} className="flex items-center justify-between p-6 bg-gray-800/30 rounded-2xl border border-gray-700/30 hover:border-neon-pink/30 transition-all">
+                      <div className="flex items-center space-x-4">
+                        <div className="p-3 bg-neon-pink/10 rounded-xl">
+                          <Star className="w-5 h-5 text-neon-pink" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-white">{purchase.guestName}</p>
+                          <p className="text-sm text-gray-400">{event?.title} • {purchase.partySize} people</p>
+                        </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold text-neon-pink">€{purchase.totalAmount}</p>
+                        <p className="font-black text-neon-pink text-lg">€{purchase.totalAmount}</p>
                         <p className="text-xs text-gray-400">{new Date(purchase.purchaseDate).toLocaleDateString()}</p>
                       </div>
                     </div>
@@ -284,131 +353,181 @@ export default function AdminPage() {
 
         {/* Events Tab */}
         {selectedTab === 'events' && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Event Management</h2>
+          <div className="space-y-8">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search events..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-neon-pink transition-colors input-glow w-64"
+                  />
+                </div>
+                
+                <div className="relative">
+                  <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value as any)}
+                    className="pl-10 pr-8 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-neon-pink transition-colors appearance-none"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="hidden">Hidden</option>
+                    <option value="sold-out">Sold Out</option>
+                  </select>
+                </div>
+              </div>
+              
               <button
                 onClick={() => setShowEventForm(true)}
-                className="flex items-center px-4 py-2 bg-neon-pink text-black font-semibold rounded-lg hover:bg-neon-pink/90 transition-colors"
+                className="btn-neon px-6 py-3 rounded-2xl font-bold text-black ripple flex items-center space-x-2"
               >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Event
+                <Plus className="w-5 h-5" />
+                <span>Create Event</span>
               </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {events.map((event) => (
-                <div key={event.id} className="bg-gray-900 rounded-xl p-6 border border-gray-800">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-lg font-semibold text-white mb-1">{event.title}</h3>
-                      <p className="text-gray-400">{event.clubName}</p>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => toggleEventStatus(event.id)}
-                        className="text-gray-400 hover:text-white transition-colors"
-                      >
-                        {event.status === 'active' ? (
-                          <ToggleRight className="w-6 h-6 text-green-400" />
-                        ) : (
-                          <ToggleLeft className="w-6 h-6" />
-                        )}
-                      </button>
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              {filteredEvents.map((event) => {
+                const soldPercentage = (event.soldTickets / event.maxTickets) * 100;
+                return (
+                  <div key={event.id} className="glass-effect-strong rounded-3xl p-6 border border-gray-700/50 card-hover">
+                    <div className="flex justify-between items-start mb-6">
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-white mb-2">{event.title}</h3>
+                        <p className="text-gray-400 font-medium">{event.clubName}</p>
+                      </div>
                       
-                      <button
-                        onClick={() => setEditingEvent(event)}
-                        className="text-gray-400 hover:text-neon-teal transition-colors"
-                      >
-                        <Edit3 className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => toggleEventStatus(event.id)}
+                          className={`p-2 rounded-lg transition-colors ${
+                            event.status === 'active' 
+                              ? 'bg-green-500/10 text-green-400 hover:bg-green-500/20' 
+                              : 'bg-gray-700/50 text-gray-400 hover:bg-gray-600/50'
+                          }`}
+                        >
+                          {event.status === 'active' ? (
+                            <ToggleRight className="w-5 h-5" />
+                          ) : (
+                            <ToggleLeft className="w-5 h-5" />
+                          )}
+                        </button>
+                        
+                        <button
+                          onClick={() => setEditingEvent(event)}
+                          className="p-2 bg-neon-teal/10 text-neon-teal rounded-lg hover:bg-neon-teal/20 transition-colors"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        
+                        <button
+                          onClick={() => deleteEvent(event.id)}
+                          className="p-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 mb-6">
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Price</span>
+                        <span className="text-neon-pink font-bold">€{event.price}</span>
+                      </div>
                       
-                      <button
-                        onClick={() => deleteEvent(event.id)}
-                        className="text-gray-400 hover:text-red-400 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Sold</span>
+                        <span className="text-white font-semibold">{event.soldTickets}/{event.maxTickets}</span>
+                      </div>
 
-                  <div className="space-y-2 mb-4">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">Price:</span>
-                      <span className="text-white">€{event.price}</span>
+                      {/* Progress Bar */}
+                      <div>
+                        <div className="flex justify-between text-sm text-gray-400 mb-2">
+                          <span>Progress</span>
+                          <span>{Math.round(soldPercentage)}%</span>
+                        </div>
+                        <div className="w-full bg-gray-800 rounded-full h-2">
+                          <div 
+                            className="h-full bg-gradient-to-r from-neon-pink to-neon-teal rounded-full transition-all duration-500"
+                            style={{ width: `${Math.min(soldPercentage, 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Status</span>
+                        <span className={`font-bold flex items-center ${
+                          event.status === 'active' ? 'text-green-400' : 
+                          event.status === 'sold-out' ? 'text-red-400' : 'text-gray-400'
+                        }`}>
+                          {event.status === 'active' && <CheckCircle className="w-4 h-4 mr-1" />}
+                          {event.status === 'sold-out' && <AlertCircle className="w-4 h-4 mr-1" />}
+                          {event.status.toUpperCase()}
+                        </span>
+                      </div>
                     </div>
-                    
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">Sold:</span>
-                      <span className="text-white">{event.soldTickets}/{event.maxTickets}</span>
-                    </div>
-                    
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">Status:</span>
-                      <span className={`font-medium ${
-                        event.status === 'active' ? 'text-green-400' : 'text-gray-400'
-                      }`}>
-                        {event.status.toUpperCase()}
-                      </span>
-                    </div>
-                  </div>
 
-                  <button
-                    onClick={() => exportGuestList(event.id)}
-                    className="w-full flex items-center justify-center px-4 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Export Guest List
-                  </button>
-                </div>
-              ))}
+                    <button
+                      onClick={() => exportGuestList(event.id)}
+                      className="w-full flex items-center justify-center px-4 py-3 bg-gray-800/50 text-gray-300 rounded-2xl hover:bg-gray-700/50 transition-colors border border-gray-700/50 hover:border-gray-600/50"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Export Guest List
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
 
         {/* Sales Tab */}
         {selectedTab === 'sales' && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold">Sales Overview</h2>
+          <div className="space-y-8">
+            <h2 className="text-3xl font-black text-white">Sales Overview</h2>
             
-            <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
+            <div className="glass-effect-strong rounded-3xl p-8 border border-gray-700/50">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-gray-700">
-                      <th className="text-left py-3 text-gray-400">Guest</th>
-                      <th className="text-left py-3 text-gray-400">Event</th>
-                      <th className="text-left py-3 text-gray-400">Party Size</th>
-                      <th className="text-left py-3 text-gray-400">Amount</th>
-                      <th className="text-left py-3 text-gray-400">Date</th>
-                      <th className="text-left py-3 text-gray-400">Status</th>
+                    <tr className="border-b border-gray-700/50">
+                      <th className="text-left py-4 text-gray-400 font-semibold">Guest</th>
+                      <th className="text-left py-4 text-gray-400 font-semibold">Event</th>
+                      <th className="text-left py-4 text-gray-400 font-semibold">Party Size</th>
+                      <th className="text-left py-4 text-gray-400 font-semibold">Amount</th>
+                      <th className="text-left py-4 text-gray-400 font-semibold">Date</th>
+                      <th className="text-left py-4 text-gray-400 font-semibold">Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {purchases.map((purchase) => {
                       const event = events.find(e => e.id === purchase.eventId);
                       return (
-                        <tr key={purchase.id} className="border-b border-gray-800">
-                          <td className="py-3">
+                        <tr key={purchase.id} className="border-b border-gray-800/30 hover:bg-gray-800/20 transition-colors">
+                          <td className="py-4">
                             <div>
-                              <p className="text-white font-medium">{purchase.guestName}</p>
+                              <p className="text-white font-semibold">{purchase.guestName}</p>
                               <p className="text-gray-400 text-sm">{purchase.email}</p>
                             </div>
                           </td>
-                          <td className="py-3 text-gray-300">{event?.title}</td>
-                          <td className="py-3 text-gray-300">{purchase.partySize}</td>
-                          <td className="py-3 text-neon-pink font-semibold">€{purchase.totalAmount}</td>
-                          <td className="py-3 text-gray-300">
+                          <td className="py-4 text-gray-300 font-medium">{event?.title}</td>
+                          <td className="py-4 text-gray-300">{purchase.partySize}</td>
+                          <td className="py-4 text-neon-pink font-bold">€{purchase.totalAmount}</td>
+                          <td className="py-4 text-gray-300">
                             {new Date(purchase.purchaseDate).toLocaleDateString()}
                           </td>
-                          <td className="py-3">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          <td className="py-4">
+                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                               purchase.status === 'confirmed' 
-                                ? 'bg-green-900 text-green-300' 
-                                : 'bg-gray-700 text-gray-300'
+                                ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+                                : 'bg-gray-700/50 text-gray-300 border border-gray-600/50'
                             }`}>
-                              {purchase.status}
+                              {purchase.status.toUpperCase()}
                             </span>
                           </td>
                         </tr>
@@ -416,6 +535,40 @@ export default function AdminPage() {
                     })}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Analytics Tab */}
+        {selectedTab === 'analytics' && (
+          <div className="space-y-8">
+            <h2 className="text-3xl font-black text-white">Analytics Dashboard</h2>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="glass-effect-strong rounded-3xl p-8 border border-gray-700/50">
+                <h3 className="text-xl font-bold text-white mb-6">Revenue Trends</h3>
+                <div className="text-center py-12">
+                  <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-400">Chart visualization would go here</p>
+                </div>
+              </div>
+              
+              <div className="glass-effect-strong rounded-3xl p-8 border border-gray-700/50">
+                <h3 className="text-xl font-bold text-white mb-6">Popular Events</h3>
+                <div className="space-y-4">
+                  {events.map((event, index) => (
+                    <div key={event.id} className="flex items-center justify-between p-4 bg-gray-800/30 rounded-xl">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-neon-pink/20 rounded-lg flex items-center justify-center text-neon-pink font-bold text-sm">
+                          {index + 1}
+                        </div>
+                        <span className="text-white font-medium">{event.title}</span>
+                      </div>
+                      <span className="text-gray-400">{event.soldTickets} sold</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

@@ -1,37 +1,89 @@
 'use client';
 
 import Link from 'next/link';
-import { Zap } from 'lucide-react';
+import { Zap, Menu, X, Shield, Users, Star } from 'lucide-react';
+import { useState } from 'react';
 
 export default function Header() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
-    <header className="bg-gray-900/80 backdrop-blur-sm border-b border-gray-800 sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center space-x-2 group">
-            <div className="p-2 bg-gradient-to-r from-neon-pink to-neon-teal rounded-lg group-hover:scale-105 transition-transform">
-              <Zap className="w-6 h-6 text-black" />
+    <header className="glass-effect-strong border-b border-gray-700/50 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20">
+          {/* Logo */}
+          <Link href="/" className="flex items-center space-x-3 group">
+            <div className="p-3 bg-gradient-to-r from-neon-pink via-neon-purple to-neon-teal rounded-xl group-hover:scale-110 transition-transform duration-300 neon-glow-rainbow">
+              <Zap className="w-7 h-7 text-black" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-neon-pink to-neon-teal bg-clip-text text-transparent">
-              SkipTheLine
-            </span>
+            <div className="flex flex-col">
+              <span className="text-2xl font-black bg-gradient-to-r from-neon-pink via-neon-purple to-neon-teal bg-clip-text text-transparent">
+                SkipTheLine
+              </span>
+              <span className="text-xs text-gray-400 font-medium">Barcelona Nightlife</span>
+            </div>
           </Link>
           
-          <nav className="flex items-center space-x-6">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-8">
             <Link 
               href="/" 
-              className="text-gray-300 hover:text-neon-pink transition-colors font-medium"
+              className="text-gray-300 hover:text-neon-pink transition-colors font-semibold text-lg flex items-center space-x-2 group"
             >
-              Events
+              <Star className="w-4 h-4 group-hover:text-neon-pink transition-colors" />
+              <span>Events</span>
             </Link>
+            
+            <div className="flex items-center space-x-2 text-gray-400 text-sm">
+              <Shield className="w-4 h-4 text-neon-green" />
+              <span>Secure • Instant • Guaranteed</span>
+            </div>
+            
             <Link 
               href="/admin" 
-              className="text-gray-400 hover:text-gray-300 transition-colors text-sm"
+              className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white transition-all rounded-xl text-sm font-medium border border-gray-700 hover:border-gray-600"
             >
               Admin
             </Link>
           </nav>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden p-2 text-gray-400 hover:text-neon-pink transition-colors"
+          >
+            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </div>
+
+        {/* Mobile Navigation */}
+        {isMenuOpen && (
+          <div className="md:hidden py-4 border-t border-gray-700/50">
+            <div className="flex flex-col space-y-4">
+              <Link 
+                href="/" 
+                className="text-gray-300 hover:text-neon-pink transition-colors font-semibold flex items-center space-x-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Star className="w-4 h-4" />
+                <span>Events</span>
+              </Link>
+              
+              <div className="flex items-center space-x-2 text-gray-400 text-sm">
+                <Shield className="w-4 h-4 text-neon-green" />
+                <span>Secure • Instant • Guaranteed</span>
+              </div>
+              
+              <Link 
+                href="/admin" 
+                className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white transition-all rounded-xl text-sm font-medium border border-gray-700 w-fit"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Admin Access
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );
