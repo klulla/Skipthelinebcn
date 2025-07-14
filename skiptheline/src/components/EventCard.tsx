@@ -2,15 +2,35 @@
 
 import Link from 'next/link';
 import { Calendar, Clock, MapPin, Star, TrendingUp, Sparkles, CheckCircle } from 'lucide-react';
-import { Event } from '@/types';
-import { mockClubs } from '@/data/mockData';
+import { Event, Club } from '@/types';
+import { useState, useEffect } from 'react';
+import { getClubs } from '@/lib/firebaseService';
 
 interface EventCardProps {
   event: Event;
 }
 
 export default function EventCard({ event }: EventCardProps) {
-  const club = mockClubs.find(c => c.id === event.clubId);
+  const [clubs, setClubs] = useState<Club[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load clubs from Firebase
+  useEffect(() => {
+    const loadClubs = async () => {
+      try {
+        const clubsData = await getClubs();
+        setClubs(clubsData);
+      } catch (error) {
+        console.error('Error loading clubs:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadClubs();
+  }, []);
+
+  const club = clubs.find(c => c.id === event.clubId);
   const clubName = club?.name || 'Unknown Club';
   const clubLocation = club?.location || 'Unknown Location';
 
@@ -103,24 +123,24 @@ export default function EventCard({ event }: EventCardProps) {
         <div className="grid grid-cols-2 gap-4 element-spacing">
           <div className="space-y-3">
             <div className="flex items-center text-gray-400 text-sm">
-              <Clock className="w-4 h-4 mr-3 text-neon-teal" />
+              <Clock className="w-4 h-4 mr-4 text-neon-teal" />
               <span>{event.time}</span>
             </div>
             
             <div className="flex items-center text-gray-400 text-sm">
-              <MapPin className="w-4 h-4 mr-3 text-neon-pink" />
+              <MapPin className="w-4 h-4 mr-4 text-neon-pink" />
               <span className="truncate">{clubLocation.split(',')[0]}</span>
             </div>
           </div>
 
           <div className="space-y-3">
             <div className="flex items-center text-gray-400 text-sm">
-              <Star className="w-4 h-4 mr-3 text-neon-purple" />
+              <Star className="w-4 h-4 mr-4 text-neon-purple" />
               <span>VIP Experience</span>
             </div>
 
             <div className="flex items-center text-gray-400 text-sm">
-              <CheckCircle className="w-4 h-4 mr-3 text-neon-green" />
+              <CheckCircle className="w-4 h-4 mr-4 text-neon-green" />
               <span>Guaranteed Entry</span>
             </div>
           </div>
@@ -129,7 +149,7 @@ export default function EventCard({ event }: EventCardProps) {
         {/* Includes Section */}
         <div className="element-spacing p-4 bg-gradient-to-r from-neon-pink/5 to-neon-teal/5 border border-neon-pink/20 rounded-2xl">
           <div className="flex items-center text-neon-pink text-sm font-semibold mb-2">
-            <Sparkles className="w-4 h-4 mr-2" />
+            <Sparkles className="w-4 h-4 mr-3" />
             <span>VIP Experience Includes</span>
           </div>
           <div className="text-gray-300 text-sm space-y-1">
@@ -172,7 +192,7 @@ export default function EventCard({ event }: EventCardProps) {
         {!isSoldOut && isLowStock && (
           <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
             <div className="flex items-center text-yellow-400 text-sm font-medium">
-              <TrendingUp className="w-4 h-4 mr-2" />
+              <TrendingUp className="w-4 h-4 mr-3" />
               <span>High demand - Limited spots remaining!</span>
             </div>
           </div>

@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/components/Header';
-import { mockEvents, mockClubs } from '@/data/mockData';
+import { Event, Club } from '@/types';
+import { getEvents, getClubs } from '@/lib/firebaseService';
 import { 
   CheckCircle, 
   Calendar, 
@@ -14,21 +15,23 @@ import {
   Mail,
   Smartphone,
   ArrowLeft,
-  Zap
+  Zap,
+  Loader
 } from 'lucide-react';
 
-export default function ConfirmationPage() {
+function ConfirmationPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [confirmationId, setConfirmationId] = useState('');
+  const [event, setEvent] = useState<Event | null>(null);
+  const [club, setClub] = useState<Club | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const eventId = searchParams.get('event');
   const partySize = parseInt(searchParams.get('party') || '1');
   const totalAmount = parseInt(searchParams.get('total') || '0');
   const urlConfirmationId = searchParams.get('id');
-
-  const event = mockEvents.find(e => e.id === eventId);
-  const club = event ? mockClubs.find(c => c.id === event.clubId) : null;
 
   useEffect(() => {
     // Use the confirmation ID from URL params, or generate a new one as fallback
@@ -38,15 +41,65 @@ export default function ConfirmationPage() {
       const id = `STL${Date.now().toString().slice(-6)}${Math.random().toString(36).substr(2, 3).toUpperCase()}`;
       setConfirmationId(id);
     }
-  }, [urlConfirmationId]);
 
-  if (!event) {
+    // Load event and club data from Firebase
+    const loadData = async () => {
+      if (!eventId) {
+        setError('No event ID provided');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const events = await getEvents();
+        const foundEvent = events.find(e => e.id === eventId);
+        
+        if (!foundEvent) {
+          setError('Event not found');
+          setLoading(false);
+          return;
+        }
+
+        setEvent(foundEvent);
+
+        // Load club data
+        const clubs = await getClubs();
+        const foundClub = clubs.find(c => c.id === foundEvent.clubId);
+        setClub(foundClub || null);
+        
+        setLoading(false);
+      } catch (error) {
+        console.error('Error loading confirmation data:', error);
+        setError('Failed to load confirmation data');
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [eventId, urlConfirmationId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center">
+            <Loader className="w-8 h-8 animate-spin mx-auto mb-4 text-neon-pink" />
+            <p className="text-gray-400">Loading confirmation...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !event) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-300 mb-4">Invalid Confirmation</h1>
+            <p className="text-gray-400 mb-4">{error || 'Event not found'}</p>
             <button 
               onClick={() => router.push('/')}
               className="text-neon-pink hover:text-neon-pink/80 transition-colors"
@@ -250,14 +303,25 @@ export default function ConfirmationPage() {
               <span className="text-blue-400">📱 WhatsApp</span>
             </button>
             <button className="p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
-              <span className="text-pink-400">📸 Instagram</span>
+              <span className="text-blue-500">📘 Facebook</span>
             </button>
             <button className="p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
-              <span className="text-blue-500">🐦 Twitter</span>
+              <span className="text-blue-400">🐦 Twitter</span>
+            </button>
+            <button className="p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
+              <span className="text-pink-500">📷 Instagram</span>
             </button>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ConfirmationPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background"><Header /><div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12"><div className="text-center"><Loader className="w-8 h-8 animate-spin mx-auto mb-4 text-neon-pink" /><p className="text-gray-400">Loading confirmation...</p></div></div></div>}>
+      <ConfirmationPageContent />
+    </Suspense>
   );
 }

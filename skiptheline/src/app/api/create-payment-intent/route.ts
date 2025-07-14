@@ -7,36 +7,93 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
 
 export async function POST(request: NextRequest) {
   try {
-    const { amount, currency = 'eur', eventId, partySize, customerEmail, customerName } = await request.json();
+    const { 
+      amount, 
+      quantity, 
+      eventId, 
+      eventTitle, 
+      guestName, 
+      email, 
+      confirmationId, 
+      spreadsheetLink,
+      redirectUrl 
+    } = await request.json();
 
-    if (!amount || !eventId || !partySize) {
+    console.log('🔗 Creating payment link with data:', {
+      amount,
+      quantity,
+      eventId,
+      eventTitle,
+      guestName,
+      email,
+      confirmationId,
+      redirectUrl
+    });
+
+    if (!amount || !quantity || !eventId || !eventTitle || !guestName || !email || !confirmationId) {
+      console.log('❌ Missing required parameters');
       return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
     }
 
-    // Create a PaymentIntent with the order amount and currency
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(amount * 100), // Convert to cents
-      currency,
-      metadata: {
-        eventId,
-        partySize: partySize.toString(),
-        customerEmail: customerEmail || '',
-        customerName: customerName || '',
+    // First create a product and price
+    const product = await stripe.products.create({
+      name: eventTitle,
+      description: `Fast Pass for ${guestName} - ${quantity} ${quantity === 1 ? 'person' : 'people'}`,
+    });
+
+    const price = await stripe.prices.create({
+      product: product.id,
+      unit_amount: Math.round(amount / quantity), // Price per person in cents
+      currency: 'eur',
+    });
+
+    const metadata = {
+      eventId,
+      eventTitle,
+      guestName,
+      partySize: quantity.toString(),
+      confirmationId,
+      spreadsheetLink: spreadsheetLink || '',
+    };
+
+    console.log('📋 Payment link metadata:', metadata);
+
+    // Create a payment link with fixed quantity and redirect
+    const paymentLink = await stripe.paymentLinks.create({
+      line_items: [
+        {
+          price: price.id,
+          quantity: quantity,
+          adjustable_quantity: {
+            enabled: false, // Disable quantity adjustment
+          },
+        },
+      ],
+      after_completion: {
+        type: 'redirect',
+        redirect: {
+          url: redirectUrl,
+        },
       },
-      // Enable automatic payment methods
-      automatic_payment_methods: {
-        enabled: true,
+      metadata,
+      allow_promotion_codes: false,
+      billing_address_collection: 'auto',
+      phone_number_collection: {
+        enabled: false,
       },
     });
 
+    console.log('✅ Payment link created:', paymentLink.id);
+    console.log('🔗 Payment link URL:', paymentLink.url);
+
     return NextResponse.json({
-      clientSecret: paymentIntent.client_secret,
-      paymentIntentId: paymentIntent.id,
+      paymentLink: paymentLink.url,
+      paymentLinkId: paymentLink.id,
     });
   } catch (error) {
-    console.error('Error creating payment intent:', error);
+    console.error('❌ Error creating payment link:', error);
     return NextResponse.json(
-      { error: 'Failed to create payment intent' },
+      { error: 'Failed to create payment link' },
       { status: 500 }
     );
   }

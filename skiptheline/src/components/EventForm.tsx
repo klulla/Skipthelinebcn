@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { Event, EventFormData } from '@/types';
-import { mockClubs } from '@/data/mockData';
+import { useState, useEffect } from 'react';
+import { Event, EventFormData, Club } from '@/types';
+import { getClubs } from '@/lib/firebaseService';
 import { 
   X, 
   Save, 
@@ -37,10 +37,29 @@ export default function EventForm({ event, onSave, onCancel, isEditing = false }
     maxTickets: event?.maxTickets || 0,
     imageUrl: event?.imageUrl || '',
     stripePaymentLink: event?.stripePaymentLink || '',
+    spreadsheetLink: event?.spreadsheetLink || '',
     availability: event?.availability || 0
   });
 
   const [errors, setErrors] = useState<Partial<EventFormData>>({});
+  const [clubs, setClubs] = useState<Club[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load clubs from Firebase
+  useEffect(() => {
+    const loadClubs = async () => {
+      try {
+        const clubsData = await getClubs();
+        setClubs(clubsData);
+      } catch (error) {
+        console.error('Error loading clubs:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadClubs();
+  }, []);
 
   const validateForm = (): boolean => {
     const newErrors: Partial<EventFormData> = {};
@@ -58,6 +77,9 @@ export default function EventForm({ event, onSave, onCancel, isEditing = false }
     if (!formData.stripePaymentLink.trim()) newErrors.stripePaymentLink = 'Stripe payment link is required';
     if (!formData.stripePaymentLink.includes('buy.stripe.com')) {
       newErrors.stripePaymentLink = 'Invalid Stripe payment link format';
+    }
+    if (formData.spreadsheetLink && !formData.spreadsheetLink.includes('docs.google.com/spreadsheets')) {
+      newErrors.spreadsheetLink = 'Invalid Google Sheets link format';
     }
 
     setErrors(newErrors);
@@ -78,7 +100,7 @@ export default function EventForm({ event, onSave, onCancel, isEditing = false }
     }
   };
 
-  const selectedClub = mockClubs.find(club => club.id === formData.clubId);
+  const selectedClub = clubs.find(club => club.id === formData.clubId);
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -131,12 +153,15 @@ export default function EventForm({ event, onSave, onCancel, isEditing = false }
                 <select
                   value={formData.clubId}
                   onChange={(e) => handleChange('clubId', e.target.value)}
+                  disabled={loading}
                   className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:outline-none transition-colors appearance-none ${
                     errors.clubId ? 'border-red-500 focus:border-red-400' : 'border-gray-600 focus:border-neon-pink'
-                  }`}
+                  } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  <option value="">Select a club</option>
-                  {mockClubs.filter(club => club.status === 'active').map(club => (
+                  <option value="">
+                    {loading ? 'Loading clubs...' : 'Select a club'}
+                  </option>
+                  {clubs.filter(club => club.status === 'active').map(club => (
                     <option key={club.id} value={club.id}>
                       {club.name} - {club.type.charAt(0).toUpperCase() + club.type.slice(1)}
                     </option>
@@ -148,6 +173,12 @@ export default function EventForm({ event, onSave, onCancel, isEditing = false }
                 <div className="text-sm text-gray-400 mt-1">
                   <MapPin className="inline w-4 h-4 mr-1" />
                   {selectedClub.location}
+                </div>
+              )}
+              {clubs.length === 0 && !loading && (
+                <div className="text-sm text-yellow-400 mt-1">
+                  <AlertCircle className="inline w-4 h-4 mr-1" />
+                  No clubs available. Please create a club first.
                 </div>
               )}
               {errors.clubId && (
@@ -343,6 +374,32 @@ export default function EventForm({ event, onSave, onCancel, isEditing = false }
               <p className="text-red-400 text-sm flex items-center">
                 <AlertCircle className="w-4 h-4 mr-1" />
                 {errors.stripePaymentLink}
+              </p>
+            )}
+          </div>
+
+          {/* Google Sheets Link */}
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-300">
+              <LinkIcon className="inline w-4 h-4 mr-2" />
+              Google Sheets Link (Optional)
+            </label>
+            <input
+              type="url"
+              value={formData.spreadsheetLink}
+              onChange={(e) => handleChange('spreadsheetLink', e.target.value)}
+              className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none transition-colors ${
+                errors.spreadsheetLink ? 'border-red-500 focus:border-red-400' : 'border-gray-600 focus:border-neon-pink'
+              }`}
+              placeholder="https://docs.google.com/spreadsheets/d/..."
+            />
+            <p className="text-gray-400 text-sm">
+              Link to the Google Sheets where purchases for this event will be tracked
+            </p>
+            {errors.spreadsheetLink && (
+              <p className="text-red-400 text-sm flex items-center">
+                <AlertCircle className="w-4 h-4 mr-1" />
+                {errors.spreadsheetLink}
               </p>
             )}
           </div>

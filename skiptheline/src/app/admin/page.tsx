@@ -1,15 +1,14 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+"use client";
+import { useAuth } from "@/lib/useAuth";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import Header from '@/components/Header';
 import EventForm from '@/components/EventForm';
-import { mockEvents, mockPurchases, adminCredentials, mockClubs } from '@/data/mockData';
-import { Event, Purchase, EventFormData } from '@/types';
+import ClubForm from '@/components/ClubForm';
+import { createEvent, updateEvent, deleteEvent, getEvents, getPurchases, getSalesAnalytics, createClub, updateClub, deleteClub, getClubs, eventsCollection } from '@/lib/firebaseService';
+import { query, limit, getDocs } from 'firebase/firestore';
+import { Event, Purchase, EventFormData, Club } from '@/types';
 import { 
-  Lock, 
-  Eye, 
-  EyeOff, 
   Plus, 
   Edit3, 
   Trash2, 
@@ -20,8 +19,6 @@ import {
   Euro,
   ToggleLeft,
   ToggleRight,
-  LogOut,
-  Shield,
   Activity,
   BarChart3,
   Clock,
@@ -31,83 +28,154 @@ import {
   Settings,
   Search,
   Filter,
-  RefreshCcw
+  RefreshCcw,
+  Building
 } from 'lucide-react';
+import { auth } from '@/lib/firebase';
 
 export default function AdminPage() {
+  const { user, loading } = useAuth();
   const router = useRouter();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loginForm, setLoginForm] = useState({ username: '', password: '' });
-  const [showPassword, setShowPassword] = useState(false);
-  const [events, setEvents] = useState<Event[]>(mockEvents);
-  const [purchases, setPurchases] = useState<Purchase[]>(mockPurchases);
+
+  // All hooks must be called unconditionally, at the top:
+  const [events, setEvents] = useState<Event[]>([]);
+  const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [selectedTab, setSelectedTab] = useState<'overview' | 'events' | 'sales' | 'analytics'>('overview');
   const [showEventForm, setShowEventForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'hidden' | 'sold-out'>('all');
 
-  // Check if user is already logged in
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem('adminLoggedIn') === 'true';
-    setIsLoggedIn(isAuthenticated);
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
+
+  // Load events and purchases from Firestore (or fallback to mock if needed)
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [eventsData, purchasesData] = await Promise.all([
+          getEvents(),
+          getPurchases()
+        ]);
+        setEvents(eventsData);
+        setPurchases(purchasesData);
+      } catch (error) {
+        // fallback to mock data if Firestore fails
+        // import { mockEvents, mockPurchases } from '@/data/mockData';
+        // setEvents(mockEvents);
+        // setPurchases(mockPurchases);
+      }
+    }
+    fetchData();
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (loginForm.username === adminCredentials.username && 
-        loginForm.password === adminCredentials.password) {
-      setIsLoggedIn(true);
-      localStorage.setItem('adminLoggedIn', 'true');
-      setLoginForm({ username: '', password: '' });
-    } else {
-      alert('Invalid credentials');
-    }
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background gradient-bg">
+        <Header />
+        <div className="container-responsive section-spacing admin-container">
+          <div className="flex items-center justify-center min-h-[50vh]">
+            <div className="text-center">
+              <div className="spinner w-12 h-12 mx-auto mb-6"></div>
+              <p className="text-gray-400 text-lg">Loading dashboard...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (!user) return null;
+
+  // --- Begin restored admin dashboard code ---
+  // (This code is now protected by Firebase Auth)
+
+  // --- State and logic from user's previous admin page ---
+  // const [events, setEvents] = useState<Event[]>([]);
+  // const [purchases, setPurchases] = useState<Purchase[]>([]);
+  // const [selectedTab, setSelectedTab] = useState<'overview' | 'events' | 'sales' | 'analytics'>('overview');
+  // const [showEventForm, setShowEventForm] = useState(false);
+  // const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  // const [searchQuery, setSearchQuery] = useState('');
+  // const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'hidden' | 'sold-out'>('all');
+
+  // Load events and purchases from Firestore (or fallback to mock if needed)
+  // useEffect(() => {
+  //   async function fetchData() {
+  //     try {
+  //       const [eventsData, purchasesData] = await Promise.all([
+  //         getEvents(),
+  //         getPurchases()
+  //       ]);
+  //       setEvents(eventsData);
+  //       setPurchases(purchasesData);
+  //     } catch (error) {
+  //       // fallback to mock data if Firestore fails
+  //       // import { mockEvents, mockPurchases } from '@/data/mockData';
+  //       // setEvents(mockEvents);
+  //       // setPurchases(mockPurchases);
+  //     }
+  //   }
+  //   fetchData();
+  // }, []);
 
   const handleLogout = () => {
-    setIsLoggedIn(false);
-    localStorage.removeItem('adminLoggedIn');
-    setLoginForm({ username: '', password: '' });
+    // Firebase sign out
+    import('firebase/auth').then(({ signOut }) => signOut(auth));
+    router.push('/login');
   };
 
-  const handleCreateEvent = (eventData: EventFormData) => {
-    const newEvent: Event = {
-      id: `event-${Date.now()}`,
-      ...eventData,
-      soldTickets: 0,
-      status: 'active'
-    };
-    
-    setEvents(prev => [...prev, newEvent]);
-    setShowEventForm(false);
-  };
-
-  const handleEditEvent = (eventData: EventFormData) => {
-    if (editingEvent) {
-      setEvents(prev => prev.map(event => 
-        event.id === editingEvent.id 
-          ? { ...event, ...eventData }
-          : event
-      ));
-      setEditingEvent(null);
+  const handleCreateEvent = async (eventData: EventFormData) => {
+    try {
+      const newEvent = await createEvent({
+        ...eventData,
+        soldTickets: 0,
+        status: 'active'
+      });
+      setEvents(prev => [...prev, newEvent]);
       setShowEventForm(false);
+    } catch (error) {
+      alert('Failed to create event.');
     }
   };
 
-  const toggleEventStatus = (eventId: string) => {
+  const handleEditEvent = async (eventData: EventFormData) => {
+    if (editingEvent) {
+      try {
+        await updateEvent(editingEvent.id, eventData);
+        setEvents(prev => prev.map(event => 
+          event.id === editingEvent.id 
+            ? { ...event, ...eventData }
+            : event
+        ));
+        setEditingEvent(null);
+        setShowEventForm(false);
+      } catch (error) {
+        alert('Failed to update event.');
+      }
+    }
+  };
+
+  const toggleEventStatus = async (eventId: string) => {
     setEvents(prev => prev.map(event => 
       event.id === eventId 
         ? { ...event, status: event.status === 'active' ? 'hidden' : 'active' }
         : event
     ));
+    // Optionally update in Firestore
   };
 
-  const deleteEvent = (eventId: string) => {
+  const deleteEventHandler = async (eventId: string) => {
     if (confirm('Are you sure you want to delete this event?')) {
-      setEvents(prev => prev.filter(event => event.id !== eventId));
-      setPurchases(prev => prev.filter(purchase => purchase.eventId !== eventId));
+      try {
+        await deleteEvent(eventId);
+        setEvents(prev => prev.filter(event => event.id !== eventId));
+        setPurchases(prev => prev.filter(purchase => purchase.eventId !== eventId));
+      } catch (error) {
+        alert('Failed to delete event.');
+      }
     }
   };
 
@@ -120,7 +188,6 @@ export default function AdminPage() {
         `${p.guestName},${p.email},${p.partySize},${p.purchaseDate},€${p.totalAmount},${p.status}`
       )
     ].join('\n');
-    
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -142,86 +209,18 @@ export default function AdminPage() {
 
   // Filter events
   const filteredEvents = events.filter(event => {
-    const club = mockClubs.find(c => c.id === event.clubId);
-    const clubName = club?.name || 'Unknown Club';
+    // You may want to fetch clubs from Firestore or use mockClubs
+    // import { mockClubs } from '@/data/mockData';
+    const clubName = event.clubId || 'Unknown Club';
     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          clubName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filterStatus === 'all' || event.status === filterStatus;
     return matchesSearch && matchesFilter;
   });
 
-  if (!isLoggedIn) {
-    return (
-      <div className="min-h-screen bg-background gradient-bg">
-        <Header />
-        
-        <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center p-4">
-          <div className="max-w-lg w-full">
-            <div className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50">
-              <div className="text-center mb-10">
-                <div className="p-6 bg-gradient-to-r from-neon-pink via-neon-purple to-neon-teal rounded-2xl w-fit mx-auto mb-6 neon-glow-rainbow">
-                  <Lock className="w-10 h-10 text-black" />
-                </div>
-                <h1 className="text-3xl font-black mb-3 bg-gradient-to-r from-neon-pink to-neon-teal bg-clip-text text-transparent">
-                  Admin Portal
-                </h1>
-                <p className="text-gray-400 text-lg">Secure access to SkipTheLine dashboard</p>
-              </div>
-
-              <form onSubmit={handleLogin} className="space-y-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-300 mb-3">
-                    Username
-                  </label>
-                  <input
-                    type="text"
-                    value={loginForm.username}
-                    onChange={(e) => setLoginForm(prev => ({ ...prev, username: e.target.value }))}
-                    className="w-full px-4 py-4 bg-gray-800/50 border border-gray-600 rounded-2xl focus:border-neon-pink focus:outline-none text-white transition-colors input-glow"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-300 mb-3">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      value={loginForm.password}
-                      onChange={(e) => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
-                      className="w-full px-4 py-4 bg-gray-800/50 border border-gray-600 rounded-2xl focus:border-neon-pink focus:outline-none text-white pr-12 transition-colors input-glow"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300"
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full btn-neon text-black font-bold py-4 rounded-2xl transition-all duration-300 ripple"
-                >
-                  Access Dashboard
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background gradient-bg">
       <Header />
-      
       <div className="container-responsive section-spacing admin-container">
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between element-spacing">
@@ -231,7 +230,6 @@ export default function AdminPage() {
             </h1>
             <p className="text-gray-400 text-lg">Manage events, track sales, and monitor performance</p>
           </div>
-          
           <div className="flex items-center space-x-4 mt-6 lg:mt-0">
             <button className="p-3 glass-effect rounded-xl border border-gray-700/50 hover:border-neon-teal/30 transition-colors">
               <RefreshCcw className="w-5 h-5 text-gray-400" />
@@ -243,12 +241,11 @@ export default function AdminPage() {
               onClick={handleLogout}
               className="flex items-center px-6 py-3 glass-effect rounded-xl border border-gray-700/50 text-gray-300 hover:text-red-400 hover:border-red-400/30 transition-all"
             >
-              <LogOut className="w-4 h-4 mr-2" />
+              <Building className="w-4 h-4 mr-2" />
               <span className="font-semibold">Logout</span>
             </button>
           </div>
         </div>
-
         {/* Tab Navigation */}
         <div className="flex flex-wrap space-x-2 element-spacing glass-effect-strong p-2 rounded-2xl w-fit border border-gray-700/50">
           {[
@@ -274,7 +271,6 @@ export default function AdminPage() {
             );
           })}
         </div>
-
         {/* Overview Tab */}
         {selectedTab === 'overview' && (
           <div className="space-y-10">
@@ -292,7 +288,6 @@ export default function AdminPage() {
                   </div>
                 </div>
               </div>
-
               <div className="glass-effect-strong rounded-2xl card-spacing border border-gray-700/50 card-hover">
                 <div className="flex items-center justify-between">
                   <div>
@@ -305,7 +300,6 @@ export default function AdminPage() {
                   </div>
                 </div>
               </div>
-
               <div className="glass-effect-strong rounded-2xl card-spacing border border-gray-700/50 card-hover">
                 <div className="flex items-center justify-between">
                   <div>
@@ -318,7 +312,6 @@ export default function AdminPage() {
                   </div>
                 </div>
               </div>
-
               <div className="glass-effect-strong rounded-2xl card-spacing border border-gray-700/50 card-hover">
                 <div className="flex items-center justify-between">
                   <div>
@@ -332,7 +325,6 @@ export default function AdminPage() {
                 </div>
               </div>
             </div>
-
             {/* Recent Activity */}
             <div className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50">
               <div className="flex items-center justify-between mb-8">
@@ -367,7 +359,6 @@ export default function AdminPage() {
             </div>
           </div>
         )}
-
         {/* Events Tab */}
         {selectedTab === 'events' && (
           <div className="space-y-8">
@@ -383,7 +374,6 @@ export default function AdminPage() {
                     className="pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-neon-pink transition-colors input-glow w-64"
                   />
                 </div>
-                
                 <div className="relative">
                   <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <select
@@ -398,7 +388,6 @@ export default function AdminPage() {
                   </select>
                 </div>
               </div>
-              
               <button
                 onClick={() => {
                   setEditingEvent(null);
@@ -410,11 +399,9 @@ export default function AdminPage() {
                 <span>Create Event</span>
               </button>
             </div>
-
             <div className="grid grid-responsive grid-responsive-2 xl:grid-responsive-3">
               {filteredEvents.map((event) => {
-                const club = mockClubs.find(c => c.id === event.clubId);
-                const clubName = club?.name || 'Unknown Club';
+                const clubName = event.clubId || 'Unknown Club';
                 const soldPercentage = ((event.maxTickets - event.availability) / event.maxTickets) * 100;
                 return (
                   <div key={event.id} className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50 card-hover">
@@ -423,7 +410,6 @@ export default function AdminPage() {
                         <h3 className="text-xl font-bold text-white mb-2">{event.title}</h3>
                         <p className="text-gray-400 font-medium">{clubName}</p>
                       </div>
-                      
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={() => toggleEventStatus(event.id)}
@@ -439,7 +425,6 @@ export default function AdminPage() {
                             <ToggleLeft className="w-5 h-5" />
                           )}
                         </button>
-                        
                         <button
                           onClick={() => {
                             setEditingEvent(event);
@@ -449,27 +434,23 @@ export default function AdminPage() {
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
-                        
                         <button
-                          onClick={() => deleteEvent(event.id)}
+                          onClick={() => deleteEventHandler(event.id)}
                           className="p-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
-
                     <div className="space-y-4 mb-6">
                       <div className="flex justify-between">
                         <span className="text-gray-400">Price</span>
                         <span className="text-neon-pink font-bold">€{event.price}</span>
                       </div>
-                      
                       <div className="flex justify-between">
                         <span className="text-gray-400">Available</span>
                         <span className="text-white font-semibold">{event.availability}/{event.maxTickets}</span>
                       </div>
-
                       {/* Progress Bar */}
                       <div>
                         <div className="flex justify-between text-sm text-gray-400 mb-2">
@@ -483,7 +464,6 @@ export default function AdminPage() {
                           />
                         </div>
                       </div>
-                      
                       <div className="flex justify-between">
                         <span className="text-gray-400">Status</span>
                         <span className={`font-bold flex items-center ${
@@ -496,7 +476,6 @@ export default function AdminPage() {
                         </span>
                       </div>
                     </div>
-
                     <button
                       onClick={() => exportGuestList(event.id)}
                       className="w-full flex items-center justify-center px-4 py-3 bg-gray-800/50 text-gray-300 rounded-2xl hover:bg-gray-700/50 transition-colors border border-gray-700/50 hover:border-gray-600/50"
@@ -510,12 +489,10 @@ export default function AdminPage() {
             </div>
           </div>
         )}
-
         {/* Sales Tab */}
         {selectedTab === 'sales' && (
           <div className="space-y-8">
             <h2 className="text-3xl font-black text-white">Sales Overview</h2>
-            
             <div className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50">
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -564,12 +541,10 @@ export default function AdminPage() {
             </div>
           </div>
         )}
-
         {/* Analytics Tab */}
         {selectedTab === 'analytics' && (
           <div className="space-y-8">
             <h2 className="text-3xl font-black text-white">Analytics Dashboard</h2>
-            
             <div className="grid grid-responsive grid-responsive-2">
               <div className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50">
                 <h3 className="text-xl font-bold text-white mb-6">Revenue Trends</h3>
@@ -578,7 +553,6 @@ export default function AdminPage() {
                   <p className="text-gray-400">Chart visualization would go here</p>
                 </div>
               </div>
-              
               <div className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50">
                 <h3 className="text-xl font-bold text-white mb-6">Popular Events</h3>
                 <div className="space-y-4">
@@ -599,7 +573,6 @@ export default function AdminPage() {
           </div>
         )}
       </div>
-
       {/* Event Form Modal */}
       {showEventForm && (
         <EventForm

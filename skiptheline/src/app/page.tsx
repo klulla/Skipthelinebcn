@@ -2,11 +2,33 @@
 
 import Header from '@/components/Header';
 import EventCard from '@/components/EventCard';
-import { mockEvents } from '@/data/mockData';
+import { getEvents } from '@/lib/firebaseService';
 import { Sparkles, Zap, Star, Shield, Clock, Users, TrendingUp, CheckCircle, Globe, Heart } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Event } from '@/types';
 
 export default function HomePage() {
-  const activeEvents = mockEvents.filter(event => event.status === 'active');
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        console.log('Loading events for main page...');
+        const eventsData = await getEvents();
+        console.log('Loaded events:', eventsData);
+        setEvents(eventsData);
+      } catch (error) {
+        console.error('Error loading events:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadEvents();
+  }, []);
+
+  const activeEvents = events.filter(event => event.status === 'active');
 
   return (
     <div className="min-h-screen bg-background gradient-bg">
@@ -47,7 +69,7 @@ export default function HomePage() {
               <span className="text-neon-teal">No guestlist, no waiting</span> — just pure nightlife access.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 element-spacing">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 element-spacing px-4 sm:px-8 md:px-16 lg:px-32 xl:px-48">
               <div className="flex items-center text-neon-teal bg-gray-900/50 px-6 py-3 rounded-full glass-effect">
                 <Star className="w-6 h-6 mr-3" />
                 <span className="font-semibold text-lg">VIP Line Access</span>
@@ -111,12 +133,17 @@ export default function HomePage() {
               {" "}Fast Passes
             </span>
           </h2>
-          <p className="text-gray-400 text-xl max-w-2xl mx-auto">
+          <p className="text-gray-400 text-xl max-w-2xl mx-auto text-center">
             Premium clubs, instant access, unforgettable nights. Select your perfect Barcelona experience.
           </p>
         </div>
 
-        {activeEvents.length > 0 ? (
+        {loading ? (
+          <div className="text-center py-16">
+            <div className="spinner w-12 h-12 mx-auto mb-6"></div>
+            <p className="text-gray-400 text-lg">Loading events...</p>
+          </div>
+        ) : activeEvents.length > 0 ? (
           <div className="grid grid-responsive grid-responsive-2">
             {activeEvents.map((event) => (
               <EventCard key={event.id} event={event} />
@@ -142,8 +169,8 @@ export default function HomePage() {
 
       {/* How It Works */}
       <section className="bg-gray-950/50 border-y border-gray-800/50">
-        <div className="container-responsive section-spacing">
-          <div className="text-center element-spacing">
+        <div className="container-responsive section-spacing flex flex-col items-center justify-center">
+          <div className="text-center element-spacing max-w-2xl mx-auto">
             <h2 className="text-4xl sm:text-5xl font-black element-spacing">
               How It Works
             </h2>
@@ -152,9 +179,9 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-responsive md:grid-responsive-3">
-            <div className="text-center group">
-              <div className="relative element-spacing">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 w-full max-w-5xl mt-12">
+            <div className="text-center group flex flex-col items-center">
+              <div className="relative element-spacing mb-6">
                 <div className="w-24 h-24 bg-gradient-to-br from-neon-pink to-neon-purple rounded-3xl flex items-center justify-center mx-auto neon-glow-pink group-hover:scale-110 transition-all duration-300">
                   <span className="text-3xl font-black text-black">1</span>
                 </div>
@@ -163,13 +190,13 @@ export default function HomePage() {
                 </div>
               </div>
               <h3 className="text-2xl font-bold element-spacing">Choose Your Event</h3>
-              <p className="text-gray-400 text-lg leading-relaxed">
+              <p className="text-gray-400 text-lg leading-relaxed px-4">
                 Browse premium clubs and select your perfect night out experience. Each venue hand-picked for quality.
               </p>
             </div>
 
-            <div className="text-center group">
-              <div className="relative element-spacing">
+            <div className="text-center group flex flex-col items-center">
+              <div className="relative element-spacing mb-6">
                 <div className="w-24 h-24 bg-gradient-to-br from-neon-teal to-neon-green rounded-3xl flex items-center justify-center mx-auto neon-glow-teal group-hover:scale-110 transition-all duration-300">
                   <span className="text-3xl font-black text-black">2</span>
                 </div>
@@ -178,13 +205,13 @@ export default function HomePage() {
                 </div>
               </div>
               <h3 className="text-2xl font-bold element-spacing">Secure Your Pass</h3>
-              <p className="text-gray-400 text-lg leading-relaxed">
+              <p className="text-gray-400 text-lg leading-relaxed px-4">
                 Quick checkout with instant confirmation and detailed arrival instructions. Payment secured by Stripe.
               </p>
             </div>
 
-            <div className="text-center group">
-              <div className="relative element-spacing">
+            <div className="text-center group flex flex-col items-center">
+              <div className="relative element-spacing mb-6">
                 <div className="w-24 h-24 bg-gradient-to-br from-neon-purple to-neon-pink rounded-3xl flex items-center justify-center mx-auto neon-glow-purple group-hover:scale-110 transition-all duration-300">
                   <span className="text-3xl font-black text-black">3</span>
                 </div>
@@ -193,7 +220,7 @@ export default function HomePage() {
                 </div>
               </div>
               <h3 className="text-2xl font-bold element-spacing">Walk Right In</h3>
-              <p className="text-gray-400 text-lg leading-relaxed">
+              <p className="text-gray-400 text-lg leading-relaxed px-4">
                 Skip the general line and enter through the VIP/express entrance. Show your pass and enjoy the night.
               </p>
             </div>
@@ -203,8 +230,8 @@ export default function HomePage() {
 
       {/* CTA Section */}
       <section className="section-spacing">
-        <div className="container-responsive text-center">
-          <div className="glass-effect-strong rounded-3xl card-spacing">
+        <div className="container-responsive text-center flex flex-col items-center justify-center">
+          <div className="glass-effect-strong rounded-3xl card-spacing max-w-2xl mx-auto flex flex-col items-center">
             <h2 className="text-3xl sm:text-4xl font-black element-spacing">
               Ready to Skip The Line?
             </h2>
@@ -213,7 +240,7 @@ export default function HomePage() {
             </p>
             <button
               onClick={() => window.location.href = '/clubs'}
-              className="btn-neon px-10 py-4 rounded-2xl font-bold text-lg text-black ripple"
+              className="btn-neon px-10 py-4 rounded-2xl font-bold text-lg text-black ripple mt-4"
             >
               View Tonight's Events
             </button>

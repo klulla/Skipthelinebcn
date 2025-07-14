@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Header from '@/components/Header';
-import { mockEvents, faqs, testimonials, mockClubs } from '@/data/mockData';
+import { faqs, testimonials } from '@/data/mockData';
+import { getEvents, getClubs } from '@/lib/firebaseService';
+import { Event, Club } from '@/types';
 import { 
   Calendar, 
   Clock, 
@@ -22,7 +24,8 @@ import {
   User,
   PartyPopper,
   Heart,
-  AlertCircle
+  AlertCircle,
+  Loader
 } from 'lucide-react';
 import PaymentForm from '@/components/PaymentForm';
 
@@ -37,9 +40,67 @@ export default function EventPage() {
     email: ''
   });
   const [partySizeError, setPartySizeError] = useState('');
+  const [events, setEvents] = useState<Event[]>([]);
+  const [clubs, setClubs] = useState<Club[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const event = mockEvents.find(e => e.id === params.id);
-  const club = event ? mockClubs.find(c => c.id === event.clubId) : null;
+  // Load events and clubs from Firebase
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        console.log('Loading event page data...');
+        console.log('Event ID from URL:', params.id);
+        
+        const [eventsData, clubsData] = await Promise.all([
+          getEvents(),
+          getClubs()
+        ]);
+        
+        console.log('Loaded events:', eventsData);
+        console.log('Loaded clubs:', clubsData);
+        
+        setEvents(eventsData);
+        setClubs(clubsData);
+        
+        // Find the specific event
+        const foundEvent = eventsData.find(e => e.id === params.id);
+        console.log('Found event:', foundEvent);
+        
+        if (foundEvent) {
+          const foundClub = clubsData.find(c => c.id === foundEvent.clubId);
+          console.log('Found club for event:', foundClub);
+        }
+        
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [params.id]);
+
+  const event = events.find(e => e.id === params.id);
+  const club = event ? clubs.find(c => c.id === event.clubId) : null;
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background gradient-bg">
+        <Header />
+        <div className="container-responsive section-spacing">
+          <div className="flex items-center justify-center min-h-[50vh]">
+            <div className="text-center">
+              <div className="spinner w-12 h-12 mx-auto mb-6"></div>
+              <p className="text-gray-400 text-lg">Loading event...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!event || !club) {
     return (
@@ -161,7 +222,7 @@ export default function EventPage() {
             <div className="container-responsive">
               <div className="glass-effect-strong rounded-3xl card-spacing mx-4">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white mb-4 text-glow-pink">
-                  {event.clubName}
+                  {club.name}
                 </h1>
                 <p className="text-2xl text-neon-pink font-bold element-spacing">
                   {event.title}
@@ -173,7 +234,7 @@ export default function EventPage() {
                   </div>
                   <div className="flex items-center text-gray-300">
                     <Clock className="w-5 h-5 mr-3 text-neon-pink" />
-                    <span className="font-medium">{event.arrivalWindow}</span>
+                    <span className="font-medium">{event.time}</span>
                   </div>
                   <div className="flex items-center text-gray-300">
                     <Users className="w-5 h-5 mr-3 text-neon-purple" />
@@ -346,32 +407,26 @@ export default function EventPage() {
                           <label className="block text-sm font-medium text-gray-300 mb-2">
                             Full Name *
                           </label>
-                          <div className="relative">
-                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            <input
-                              type="text"
-                              value={customerInfo.name}
-                              onChange={(e) => setCustomerInfo(prev => ({ ...prev, name: e.target.value }))}
-                              className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-neon-pink focus:ring-1 focus:ring-neon-pink transition-colors input-glow"
-                              placeholder="Enter your full name"
-                            />
-                          </div>
+                          <input
+                            type="text"
+                            value={customerInfo.name}
+                            onChange={(e) => setCustomerInfo(prev => ({ ...prev, name: e.target.value }))}
+                            className="w-full pl-4 pr-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-neon-pink focus:ring-1 focus:ring-neon-pink transition-colors input-glow"
+                            placeholder="Enter your full name"
+                          />
                         </div>
 
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
                             Email Address *
                           </label>
-                          <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            <input
-                              type="email"
-                              value={customerInfo.email}
-                              onChange={(e) => setCustomerInfo(prev => ({ ...prev, email: e.target.value }))}
-                              className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-neon-pink focus:ring-1 focus:ring-neon-pink transition-colors input-glow"
-                              placeholder="Enter your email"
-                            />
-                          </div>
+                          <input
+                            type="email"
+                            value={customerInfo.email}
+                            onChange={(e) => setCustomerInfo(prev => ({ ...prev, email: e.target.value }))}
+                            className="w-full pl-4 pr-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-neon-pink focus:ring-1 focus:ring-neon-pink transition-colors input-glow"
+                            placeholder="Enter your email"
+                          />
                         </div>
                       </div>
 
@@ -381,14 +436,13 @@ export default function EventPage() {
                           Party Size (How many people?)
                         </label>
                         <div className="relative">
-                          <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                           <input
                             type="number"
                             min="1"
                             max={availableTickets}
                             value={partySize}
                             onChange={(e) => handlePartySizeChange(e.target.value)}
-                            className={`w-full pl-10 pr-4 py-3 bg-gray-800/50 border rounded-xl text-white placeholder-gray-400 focus:ring-1 transition-colors input-glow ${
+                            className={`w-full pl-4 pr-4 py-3 bg-gray-800/50 border rounded-xl text-white placeholder-gray-400 focus:ring-1 transition-colors input-glow ${
                               partySizeError 
                                 ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' 
                                 : 'border-gray-600 focus:border-neon-pink focus:ring-neon-pink/20'
@@ -483,6 +537,7 @@ export default function EventPage() {
                     partySize={partySizeNum}
                     customerInfo={customerInfo}
                     stripePaymentLink={event.stripePaymentLink}
+                    spreadsheetLink={event.spreadsheetLink}
                   />
                 </>
               )}

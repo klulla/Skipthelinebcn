@@ -14,6 +14,7 @@ interface PaymentFormProps {
     email: string;
   };
   stripePaymentLink: string;
+  spreadsheetLink?: string;
 }
 
 // Generate a random confirmation ID
@@ -26,98 +27,16 @@ const generateConfirmationId = (): string => {
   return result;
 };
 
-export default function PaymentForm({ amount, eventId, eventTitle, partySize, customerInfo, stripePaymentLink }: PaymentFormProps) {
+export default function PaymentForm({ amount, eventId, eventTitle, partySize, customerInfo, stripePaymentLink, spreadsheetLink }: PaymentFormProps) {
   const router = useRouter();
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [confirmationId, setConfirmationId] = useState('');
   const [copied, setCopied] = useState(false);
+  const [isCreatingPaymentLink, setIsCreatingPaymentLink] = useState(false);
 
   // Generate confirmation ID when component mounts
   useEffect(() => {
     setConfirmationId(generateConfirmationId());
   }, []);
-
-  // Function to save to Google Sheets
-  const saveToGoogleSheets = async (purchaseData: any) => {
-    try {
-      // TODO: Replace with actual Google Sheets integration
-      // const response = await fetch('/api/sheets/add-purchase', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(purchaseData)
-      // });
-      
-      console.log('Saving to Google Sheets:', purchaseData);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-    } catch (error) {
-      console.error('Error saving to Google Sheets:', error);
-      throw error;
-    }
-  };
-
-  // Function to send confirmation email
-  const sendConfirmationEmail = async (customerData: any) => {
-    try {
-      // TODO: Replace with actual email service integration
-      // const response = await fetch('/api/email/send-confirmation', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(customerData)
-      // });
-      
-      console.log('Sending confirmation email:', customerData);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-    } catch (error) {
-      console.error('Error sending confirmation email:', error);
-      throw error;
-    }
-  };
-
-  // Handle successful payment (this would be called via webhook in real implementation)
-  const handlePaymentSuccess = async () => {
-    setIsProcessing(true);
-
-    try {
-      const purchaseData = {
-        confirmationId,
-        eventId,
-        eventTitle,
-        customerName: customerInfo.name,
-        email: customerInfo.email,
-        partySize,
-        totalAmount: amount,
-        purchaseDate: new Date().toISOString(),
-        status: 'confirmed',
-        // Add sheet ID for this specific event
-        sheetId: `${eventId}_purchases`
-      };
-
-      // Save to Google Sheets
-      await saveToGoogleSheets(purchaseData);
-
-      // Send confirmation email
-      await sendConfirmationEmail({
-        ...purchaseData,
-        eventName: eventTitle
-      });
-
-      setPaymentSuccess(true);
-      
-      // Redirect to confirmation after success
-      setTimeout(() => {
-        router.push(`/confirmation?id=${confirmationId}&event=${eventId}&party=${partySize}&total=${amount}&name=${encodeURIComponent(customerInfo.name)}&email=${encodeURIComponent(customerInfo.email)}`);
-      }, 3000);
-      
-    } catch (error) {
-      console.error('Error processing payment success:', error);
-      // Handle error appropriately
-    } finally {
-      setIsProcessing(false);
-    }
-  };
 
   // Copy confirmation ID to clipboard
   const copyConfirmationId = () => {
@@ -126,57 +45,43 @@ export default function PaymentForm({ amount, eventId, eventTitle, partySize, cu
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Construct Stripe payment link with prefilled data
-  const constructStripeUrl = () => {
-    const url = new URL(stripePaymentLink);
-    
-    // Add prefilled data to Stripe payment link
-    if (customerInfo.email) {
-      url.searchParams.set('prefilled_email', customerInfo.email);
-    }
-    
-    // Add client reference ID for tracking
-    url.searchParams.set('client_reference_id', confirmationId);
-    
-    return url.toString();
-  };
+  // Create a new Stripe payment link with fixed quantity and redirect
+  const createPaymentLink = async () => {
+    setIsCreatingPaymentLink(true);
+    try {
+      const response = await fetch('/api/create-payment-intent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: amount * 100, // Convert to cents
+          quantity: partySize,
+          eventId,
+          eventTitle,
+          guestName: customerInfo.name,
+          email: customerInfo.email,
+          confirmationId,
+          spreadsheetLink,
+          redirectUrl: `${window.location.origin}/confirmation?id=${confirmationId}&event=${eventId}&party=${partySize}&total=${amount}`
+        }),
+      });
 
-  if (paymentSuccess) {
-    return (
-      <div className="text-center py-12">
-        <div className="w-24 h-24 bg-gradient-to-r from-neon-green to-neon-teal rounded-full flex items-center justify-center mx-auto mb-8 neon-glow-teal">
-          <CheckCircle className="w-12 h-12 text-black" />
-        </div>
-        <h3 className="text-3xl font-bold text-neon-green mb-4">Payment Successful!</h3>
-        <p className="text-gray-400 mb-8 text-lg">Processing your order and sending confirmation...</p>
-        
-        <div className="bg-gray-800/50 p-6 rounded-2xl max-w-md mx-auto border border-neon-green/20">
-          <h4 className="text-lg font-bold text-white mb-3">Your Confirmation ID</h4>
-          <div className="flex items-center justify-between bg-gray-900/50 p-4 rounded-xl">
-            <span className="text-neon-green font-mono text-xl">{confirmationId}</span>
-            <button
-              onClick={copyConfirmationId}
-              className="p-2 text-gray-400 hover:text-neon-green transition-colors"
-            >
-              <Copy className="w-5 h-5" />
-            </button>
-          </div>
-          {copied && <p className="text-neon-green text-sm mt-2">Copied to clipboard!</p>}
-        </div>
-        
-        <div className="flex items-center justify-center gap-8 mt-8">
-          <div className="flex items-center text-gray-400">
-            <FileSpreadsheet className="w-5 h-5 mr-2" />
-            <span>Saved to records</span>
-          </div>
-          <div className="flex items-center text-gray-400">
-            <Mail className="w-5 h-5 mr-2" />
-            <span>Email sent</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
+      if (!response.ok) {
+        throw new Error('Failed to create payment link');
+      }
+
+      const data = await response.json();
+      
+      // Redirect to the new payment link
+      window.location.href = data.paymentLink;
+    } catch (error) {
+      console.error('Error creating payment link:', error);
+      alert('Failed to create payment link. Please try again.');
+    } finally {
+      setIsCreatingPaymentLink(false);
+    }
+  };
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -240,17 +145,40 @@ export default function PaymentForm({ amount, eventId, eventTitle, partySize, cu
           <p className="text-gray-400 text-sm mt-2">This will be saved to our records and emailed to you</p>
         </div>
 
+        {/* Important Note */}
+        <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-6 mb-8">
+          <div className="flex items-start space-x-4">
+            <AlertCircle className="w-6 h-6 text-blue-400 mt-0.5 flex-shrink-0 mr-3" />
+            <div>
+              <h4 className="font-bold text-blue-400 mb-2">Fixed Quantity Payment</h4>
+              <p className="text-gray-300 text-sm leading-relaxed">
+                Your party size of {partySize} people is locked in and cannot be changed during payment. 
+                After successful payment, you'll automatically be redirected to the confirmation page 
+                and receive a confirmation email.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Payment Button */}
         <div className="text-center">
-          <a
-            href={constructStripeUrl()}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center px-8 py-4 btn-neon text-black font-bold rounded-2xl transition-all duration-300 ripple"
+          <button
+            onClick={createPaymentLink}
+            disabled={isCreatingPaymentLink}
+            className="inline-flex items-center px-8 py-4 btn-neon text-black font-bold rounded-2xl transition-all duration-300 ripple disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span className="mr-3">Complete Payment</span>
-            <ExternalLink className="w-5 h-5" />
-          </a>
+            {isCreatingPaymentLink ? (
+              <>
+                <Loader className="w-5 h-5 mr-3 animate-spin" />
+                Creating Payment...
+              </>
+            ) : (
+              <>
+                <span className="mr-3">Complete Payment</span>
+                <ExternalLink className="w-5 h-5" />
+              </>
+            )}
+          </button>
           <p className="text-gray-500 text-sm mt-4">
             You'll be redirected to Stripe to complete your payment securely
           </p>
@@ -258,26 +186,8 @@ export default function PaymentForm({ amount, eventId, eventTitle, partySize, cu
 
         {/* Security Note */}
         <div className="flex items-center justify-center text-gray-400 text-sm mt-8">
-          <Shield className="w-4 h-4 mr-2" />
+          <Shield className="w-4 h-4 mr-3" />
           <span>Secured by Stripe • SSL Encrypted</span>
-        </div>
-
-        {/* Test Payment Button (Remove in production) */}
-        <div className="text-center mt-6">
-          <button
-            onClick={handlePaymentSuccess}
-            disabled={isProcessing}
-            className="px-6 py-3 bg-gray-800 text-gray-400 rounded-xl hover:bg-gray-700 transition-colors text-sm border border-gray-600"
-          >
-            {isProcessing ? (
-              <>
-                <Loader className="w-4 h-4 mr-2 animate-spin inline" />
-                Processing...
-              </>
-            ) : (
-              'Test Success (Remove in Production)'
-            )}
-          </button>
         </div>
       </div>
     </div>

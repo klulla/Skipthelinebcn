@@ -24,6 +24,7 @@ export interface Event {
   imageUrl: string;
   status: 'active' | 'sold-out' | 'hidden';
   stripePaymentLink: string;
+  spreadsheetLink?: string; // Google Sheets link for this event
   availability: number; // Available spots remaining (maxTickets - soldTickets but managed separately)
 }
 
@@ -37,6 +38,7 @@ export interface Purchase {
   status: 'confirmed' | 'used' | 'cancelled';
   totalAmount: number;
   stripePaymentId?: string;
+  confirmationId?: string;
 }
 
 export interface Admin {
@@ -65,6 +67,7 @@ export interface EventFormData {
   maxTickets: number;
   imageUrl: string;
   stripePaymentLink: string;
+  spreadsheetLink?: string; // Google Sheets link for this event
   availability: number;
 }
 

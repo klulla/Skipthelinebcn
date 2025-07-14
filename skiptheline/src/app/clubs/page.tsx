@@ -3,17 +3,41 @@
 import { useState } from 'react';
 import Header from '@/components/Header';
 import EventCard from '@/components/EventCard';
-import { mockClubs, mockEvents } from '@/data/mockData';
+import { getEvents, getClubs } from '@/lib/firebaseService';
 import { Club, Event } from '@/types';
 import { MapPin, Users, Star, Calendar, Filter, Search } from 'lucide-react';
+import { useEffect } from 'react';
 
 export default function ClubsPage() {
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'nightclub' | 'rooftop' | 'beach' | 'underground'>('all');
+  const [events, setEvents] = useState<Event[]>([]);
+  const [clubs, setClubs] = useState<Club[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const activeClubs = mockClubs.filter(club => club.status === 'active');
-  const activeEvents = mockEvents.filter(event => event.status === 'active');
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const [eventsData, clubsData] = await Promise.all([
+          getEvents(),
+          getClubs()
+        ]);
+        setEvents(eventsData);
+        setClubs(clubsData);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const activeClubs = clubs.filter(club => club.status === 'active');
+  const activeEvents = events.filter(event => event.status === 'active');
 
   const filteredClubs = activeClubs.filter(club => {
     const matchesSearch = club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -27,7 +51,7 @@ export default function ClubsPage() {
   };
 
   const getClub = (clubId: string) => {
-    return mockClubs.find(club => club.id === clubId);
+    return clubs.find(club => club.id === clubId);
   };
 
   return (
