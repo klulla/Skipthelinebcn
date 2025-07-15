@@ -132,7 +132,8 @@ export default function AdminPage() {
       const newEvent = await createEvent({
         ...eventData,
         soldTickets: 0,
-        status: 'active'
+        status: 'active',
+        stripePaymentLink: '' // Will be generated when needed
       });
       setEvents(prev => [...prev, newEvent]);
       setShowEventForm(false);
