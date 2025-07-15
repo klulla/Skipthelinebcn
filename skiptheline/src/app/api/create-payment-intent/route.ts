@@ -15,7 +15,6 @@ export async function POST(request: NextRequest) {
       guestName, 
       email, 
       confirmationId, 
-      spreadsheetLink,
       redirectUrl 
     } = await request.json();
 
@@ -53,7 +52,6 @@ export async function POST(request: NextRequest) {
       guestName,
       partySize: quantity.toString(),
       confirmationId,
-      spreadsheetLink: spreadsheetLink || '',
     };
 
     console.log('📋 Payment link metadata:', metadata);

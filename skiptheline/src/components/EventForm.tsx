@@ -11,12 +11,12 @@ import {
   MapPin, 
   Users, 
   Euro,
-  Link as LinkIcon,
   ImageIcon,
   FileText,
   Building,
   AlertCircle,
-  ChevronDown
+  ChevronDown,
+  Lock
 } from 'lucide-react';
 
 interface EventFormProps {
@@ -36,8 +36,7 @@ export default function EventForm({ event, onSave, onCancel, isEditing = false }
     description: event?.description || '',
     maxTickets: event?.maxTickets || 0,
     imageUrl: event?.imageUrl || '',
-    stripePaymentLink: event?.stripePaymentLink || '',
-    spreadsheetLink: event?.spreadsheetLink || '',
+    lockTime: event?.lockTime || '',
     availability: event?.availability || 0
   });
 
@@ -74,13 +73,20 @@ export default function EventForm({ event, onSave, onCancel, isEditing = false }
     if (formData.availability < 0) newErrors.availability = 'Availability cannot be negative' as any;
     if (formData.availability > formData.maxTickets) newErrors.availability = 'Availability cannot exceed max tickets' as any;
     if (!formData.imageUrl.trim()) newErrors.imageUrl = 'Image URL is required';
-    if (!formData.stripePaymentLink.trim()) newErrors.stripePaymentLink = 'Stripe payment link is required';
-    if (!formData.stripePaymentLink.includes('buy.stripe.com')) {
-      newErrors.stripePaymentLink = 'Invalid Stripe payment link format';
+    
+    // Validate lock time if provided
+    if (formData.lockTime) {
+      const lockDateTime = new Date(formData.lockTime);
+      const eventDateTime = new Date(`${formData.date}T${formData.time}`);
+      
+      if (lockDateTime <= new Date()) {
+        newErrors.lockTime = 'Lock time must be in the future' as any;
+      } else if (lockDateTime >= eventDateTime) {
+        newErrors.lockTime = 'Lock time must be before the event time' as any;
+      }
     }
-    if (formData.spreadsheetLink && !formData.spreadsheetLink.includes('docs.google.com/spreadsheets')) {
-      newErrors.spreadsheetLink = 'Invalid Google Sheets link format';
-    }
+    
+
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -216,7 +222,7 @@ export default function EventForm({ event, onSave, onCancel, isEditing = false }
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-gray-300">
                 <Clock className="inline w-4 h-4 mr-2" />
-                Time
+                Event Time
               </label>
               <input
                 type="time"
@@ -355,51 +361,29 @@ export default function EventForm({ event, onSave, onCancel, isEditing = false }
             )}
           </div>
 
-          {/* Stripe Payment Link */}
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-300">
-              <LinkIcon className="inline w-4 h-4 mr-2" />
-              Stripe Payment Link
-            </label>
-            <input
-              type="url"
-              value={formData.stripePaymentLink}
-              onChange={(e) => handleChange('stripePaymentLink', e.target.value)}
-              className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none transition-colors ${
-                errors.stripePaymentLink ? 'border-red-500 focus:border-red-400' : 'border-gray-600 focus:border-neon-pink'
-              }`}
-              placeholder="https://buy.stripe.com/..."
-            />
-            {errors.stripePaymentLink && (
-              <p className="text-red-400 text-sm flex items-center">
-                <AlertCircle className="w-4 h-4 mr-1" />
-                {errors.stripePaymentLink}
-              </p>
-            )}
-          </div>
 
-          {/* Google Sheets Link */}
+
+          {/* Lock Time */}
           <div className="space-y-2">
             <label className="block text-sm font-semibold text-gray-300">
-              <LinkIcon className="inline w-4 h-4 mr-2" />
-              Google Sheets Link (Optional)
+              <Lock className="inline w-4 h-4 mr-2" />
+              Lock Time (Optional)
             </label>
             <input
-              type="url"
-              value={formData.spreadsheetLink}
-              onChange={(e) => handleChange('spreadsheetLink', e.target.value)}
-              className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none transition-colors ${
-                errors.spreadsheetLink ? 'border-red-500 focus:border-red-400' : 'border-gray-600 focus:border-neon-pink'
+              type="datetime-local"
+              value={formData.lockTime}
+              onChange={(e) => handleChange('lockTime', e.target.value)}
+              className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:outline-none transition-colors ${
+                errors.lockTime ? 'border-red-500 focus:border-red-400' : 'border-gray-600 focus:border-neon-pink'
               }`}
-              placeholder="https://docs.google.com/spreadsheets/d/..."
             />
             <p className="text-gray-400 text-sm">
-              Link to the Google Sheets where purchases for this event will be tracked
+              Stop ticket sales at this time
             </p>
-            {errors.spreadsheetLink && (
+            {errors.lockTime && (
               <p className="text-red-400 text-sm flex items-center">
                 <AlertCircle className="w-4 h-4 mr-1" />
-                {errors.spreadsheetLink}
+                {errors.lockTime}
               </p>
             )}
           </div>

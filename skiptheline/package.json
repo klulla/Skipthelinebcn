@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build --no-lint",
     "start": "next start"
-    },
+  },
   "dependencies": {
     "@stripe/stripe-js": "^7.4.0",
     "dotenv": "^17.2.0",

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { createPurchase } from '@/lib/firebaseService';
+import { createPurchase, getEvent } from '@/lib/firebaseService';
 import { sendEmail } from '@/lib/emailService';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -40,7 +40,6 @@ export async function POST(request: NextRequest) {
       const partySize = parseInt(session.metadata?.partySize || '1');
       const eventTitle = session.metadata?.eventTitle;
       const eventDate = session.metadata?.eventDate;
-      const spreadsheetLink = session.metadata?.spreadsheetLink;
       const confirmationId = session.metadata?.confirmationId;
       // Use customer_email or customer_details.email
       const email = session.customer_email || session.customer_details?.email;
@@ -55,9 +54,31 @@ export async function POST(request: NextRequest) {
       });
       
       if (eventId && guestName && email) {
-        console.log('✅ All required data present, creating purchase...');
+        console.log('✅ All required data present, checking event status...');
         
         try {
+          // Get the event to check if it's locked
+          const eventData = await getEvent(eventId);
+          if (!eventData) {
+            console.error('❌ Event not found:', eventId);
+            return NextResponse.json({ error: 'Event not found' }, { status: 404 });
+          }
+          
+          // Check if event is locked (past lock time)
+          if (eventData.lockTime) {
+            const lockTime = new Date(eventData.lockTime);
+            const now = new Date();
+            
+            if (now > lockTime) {
+              console.log('❌ Event is locked, payment rejected');
+              return NextResponse.json({ 
+                error: 'Event is locked - ticket sales have ended' 
+              }, { status: 400 });
+            }
+          }
+          
+          console.log('✅ Event is not locked, creating purchase...');
+          
           // Create purchase in Firebase
           const purchase = await createPurchase({
             eventId,

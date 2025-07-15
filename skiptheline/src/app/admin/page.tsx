@@ -197,6 +197,9 @@ export default function AdminPage() {
     window.URL.revokeObjectURL(url);
   };
 
+
+
+  
   // Calculate stats
   const totalRevenue = purchases.reduce((sum, p) => sum + p.totalAmount, 0);
   const totalTicketsSold = purchases.reduce((sum, p) => sum + p.partySize, 0);
@@ -231,6 +234,7 @@ export default function AdminPage() {
             <p className="text-gray-400 text-lg">Manage events, track sales, and monitor performance</p>
           </div>
           <div className="flex items-center space-x-4 mt-6 lg:mt-0">
+
             <button className="p-3 glass-effect rounded-xl border border-gray-700/50 hover:border-neon-teal/30 transition-colors">
               <RefreshCcw className="w-5 h-5 text-gray-400" />
             </button>

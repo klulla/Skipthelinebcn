@@ -139,9 +139,13 @@ export default function EventPage() {
   };
 
   const availableTickets = event.availability;
-  const isSoldOut = event.status === 'sold-out' || availableTickets <= 0;
+  // Check if event is locked
+  const isEventLocked = event.lockTime ? new Date() > new Date(event.lockTime) : false;
+  const isSoldOut = availableTickets <= 0;
+  const canPurchase = !isSoldOut && !isEventLocked;
+
   const partySizeNum = parseInt(partySize) || 0;
-  const totalPrice = event.price * partySizeNum;
+  const totalPrice = partySizeNum * event.price;
   const soldPercentage = ((event.maxTickets - event.availability) / event.maxTickets) * 100;
 
   const validatePartySize = (value: string): boolean => {
@@ -292,6 +296,20 @@ export default function EventPage() {
                       <div className="text-sm text-gray-500">Spots Remaining</div>
                     </div>
                   </div>
+                  
+                  {event.lockTime && (
+                    <div className="flex items-center text-gray-300">
+                      <Lock className="w-6 h-6 mr-4 text-orange-400" />
+                      <div>
+                        <div className="font-semibold">
+                          {isEventLocked ? 'Sales Closed' : 'Sales Close Soon'}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {new Date(event.lockTime).toLocaleString()}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -397,7 +415,7 @@ export default function EventPage() {
                     )}
                   </div>
 
-                  {!isSoldOut ? (
+                  {canPurchase ? (
                     <div className="space-y-8">
                       {/* Customer Info */}
                       <div className="space-y-4">
@@ -503,12 +521,26 @@ export default function EventPage() {
                     </div>
                   ) : (
                     <div className="text-center">
-                      <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 mb-6">
-                        <h3 className="font-bold text-red-400 mb-3 text-xl">Sold Out</h3>
-                        <p className="text-gray-400 leading-relaxed">
-                          This event has reached capacity. Check back for future events or join our waitlist!
-                        </p>
-                      </div>
+                      {isEventLocked ? (
+                        <div className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-6 mb-6">
+                          <h3 className="font-bold text-orange-400 mb-3 text-xl">Ticket Sales Closed</h3>
+                          <p className="text-gray-400 leading-relaxed">
+                            Ticket sales for this event have ended. The guest list has been sent to the venue.
+                          </p>
+                          {event.lockTime && (
+                            <p className="text-sm text-gray-500 mt-2">
+                              Sales closed at: {new Date(event.lockTime).toLocaleString()}
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 mb-6">
+                          <h3 className="font-bold text-red-400 mb-3 text-xl">Sold Out</h3>
+                          <p className="text-gray-400 leading-relaxed">
+                            This event has reached capacity. Check back for future events or join our waitlist!
+                          </p>
+                        </div>
+                      )}
                       
                       <button 
                         onClick={() => router.push('/')}
@@ -537,7 +569,6 @@ export default function EventPage() {
                     partySize={partySizeNum}
                     customerInfo={customerInfo}
                     stripePaymentLink={event.stripePaymentLink}
-                    spreadsheetLink={event.spreadsheetLink}
                   />
                 </>
               )}

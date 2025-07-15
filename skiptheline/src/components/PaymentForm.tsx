@@ -14,7 +14,6 @@ interface PaymentFormProps {
     email: string;
   };
   stripePaymentLink: string;
-  spreadsheetLink?: string;
 }
 
 // Generate a random confirmation ID
@@ -27,7 +26,7 @@ const generateConfirmationId = (): string => {
   return result;
 };
 
-export default function PaymentForm({ amount, eventId, eventTitle, partySize, customerInfo, stripePaymentLink, spreadsheetLink }: PaymentFormProps) {
+export default function PaymentForm({ amount, eventId, eventTitle, partySize, customerInfo, stripePaymentLink }: PaymentFormProps) {
   const router = useRouter();
   const [confirmationId, setConfirmationId] = useState('');
   const [copied, setCopied] = useState(false);
@@ -62,7 +61,6 @@ export default function PaymentForm({ amount, eventId, eventTitle, partySize, cu
           guestName: customerInfo.name,
           email: customerInfo.email,
           confirmationId,
-          spreadsheetLink,
           redirectUrl: `${window.location.origin}/confirmation?id=${confirmationId}&event=${eventId}&party=${partySize}&total=${amount}`
         }),
       });

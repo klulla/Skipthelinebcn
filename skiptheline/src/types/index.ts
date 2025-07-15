@@ -24,7 +24,7 @@ export interface Event {
   imageUrl: string;
   status: 'active' | 'sold-out' | 'hidden';
   stripePaymentLink: string;
-  spreadsheetLink?: string; // Google Sheets link for this event
+  lockTime?: string; // Time when ticket sales stop (ISO string)
   availability: number; // Available spots remaining (maxTickets - soldTickets but managed separately)
 }
 
@@ -66,8 +66,7 @@ export interface EventFormData {
   // Removed arrivalWindow
   maxTickets: number;
   imageUrl: string;
-  stripePaymentLink: string;
-  spreadsheetLink?: string; // Google Sheets link for this event
+  lockTime?: string; // Time when ticket sales stop (ISO string)
   availability: number;
 }
 

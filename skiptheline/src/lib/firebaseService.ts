@@ -6,6 +6,7 @@ import {
   deleteDoc, 
   doc, 
   getDocs, 
+  getDoc,
   query, 
   orderBy,
   where,
@@ -51,6 +52,22 @@ export const createEvent = async (eventData: Omit<Event, 'id'>) => {
       code: (error as any)?.code,
       stack: error instanceof Error ? error.stack : undefined
     });
+    throw error;
+  }
+};
+
+export const getEvent = async (eventId: string) => {
+  try {
+    const eventRef = doc(db, 'events', eventId);
+    const eventDoc = await getDoc(eventRef);
+    
+    if (eventDoc.exists()) {
+      return { id: eventDoc.id, ...eventDoc.data() } as Event;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error('Error getting event:', error);
     throw error;
   }
 };
