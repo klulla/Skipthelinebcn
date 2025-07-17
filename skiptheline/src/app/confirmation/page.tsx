@@ -273,46 +273,10 @@ function ConfirmationPageContent() {
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-          <button className="flex items-center justify-center px-6 py-3 bg-neon-teal text-black font-semibold rounded-lg hover:bg-neon-teal/90 transition-colors">
-            <Mail className="w-5 h-5 mr-2" />
-            Email Confirmation
-          </button>
-          
-          <button className="flex items-center justify-center px-6 py-3 bg-gray-700 text-white font-semibold rounded-lg hover:bg-gray-600 transition-colors">
-            <Download className="w-5 h-5 mr-2" />
-            Download Pass
-          </button>
-          
-          <button 
-            onClick={() => router.push('/')}
-            className="flex items-center justify-center px-6 py-3 border border-gray-600 text-gray-300 font-semibold rounded-lg hover:border-gray-500 hover:text-white transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            Browse More Events
-          </button>
-        </div>
+        {/* Removed email confirmation, download pass, and browse more events buttons */}
 
         {/* Social Sharing */}
-        <div className="mt-12 text-center">
-          <p className="text-gray-400 mb-4">
-            Share your night out with friends!
-          </p>
-          <div className="flex justify-center space-x-4">
-            <button className="p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
-              <span className="text-blue-400">📱 WhatsApp</span>
-            </button>
-            <button className="p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
-              <span className="text-blue-500">📘 Facebook</span>
-            </button>
-            <button className="p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
-              <span className="text-blue-400">🐦 Twitter</span>
-            </button>
-            <button className="p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
-              <span className="text-pink-500">📷 Instagram</span>
-            </button>
-          </div>
-        </div>
+        {/* Removed social sharing section (WhatsApp, Facebook, Twitter, Instagram) */}
       </div>
     </div>
   );

@@ -77,13 +77,13 @@ export default function ClubsPage() {
         {/* Search and Filter */}
         <div className="flex flex-col lg:flex-row gap-6 element-spacing">
           <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            {/* Removed Search icon */}
             <input
               type="text"
               placeholder="Search clubs or locations..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 bg-gray-800/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:border-neon-pink focus:outline-none transition-colors input-glow"
+              className="w-full pl-6 pr-4 py-4 bg-gray-800/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:border-neon-pink focus:outline-none transition-colors input-glow"
             />
           </div>
           

@@ -4,12 +4,13 @@ import Header from '@/components/Header';
 import EventCard from '@/components/EventCard';
 import { getEvents } from '@/lib/firebaseService';
 import { Sparkles, Zap, Star, Shield, Clock, Users, TrendingUp, CheckCircle, Globe, Heart } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Event } from '@/types';
 
 export default function HomePage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const howItWorksRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const loadEvents = async () => {
@@ -70,16 +71,16 @@ export default function HomePage() {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 element-spacing px-4 sm:px-8 md:px-16 lg:px-32 xl:px-48">
-              <div className="flex items-center text-neon-teal bg-gray-900/50 px-6 py-3 rounded-full glass-effect">
-                <Star className="w-6 h-6 mr-3" />
+              <div className="flex items-center justify-center text-neon-teal bg-neon-teal/10 px-8 py-4 rounded-full glass-effect border-2 border-neon-teal-60 shadow-lg">
+                <Star className="w-7 h-7 mr-3" />
                 <span className="font-semibold text-lg">VIP Line Access</span>
               </div>
-              <div className="flex items-center text-neon-pink bg-gray-900/50 px-6 py-3 rounded-full glass-effect">
-                <Sparkles className="w-6 h-6 mr-3" />
+              <div className="flex items-center justify-center text-neon-pink bg-neon-pink/10 px-8 py-4 rounded-full glass-effect border-2 border-neon-pink-60 shadow-lg">
+                <Sparkles className="w-7 h-7 mr-3" />
                 <span className="font-semibold text-lg">Instant Entry</span>
               </div>
-              <div className="flex items-center text-neon-green bg-gray-900/50 px-6 py-3 rounded-full glass-effect">
-                <Shield className="w-6 h-6 mr-3" />
+              <div className="flex items-center justify-center text-neon-green bg-neon-green/10 px-8 py-4 rounded-full glass-effect border-2 border-neon-green-60 shadow-lg">
+                <Shield className="w-7 h-7 mr-3" />
                 <span className="font-semibold text-lg">100% Guaranteed</span>
               </div>
             </div>
@@ -90,10 +91,6 @@ export default function HomePage() {
                 className="btn-neon px-12 py-4 rounded-2xl font-bold text-lg text-black ripple"
               >
                 Browse Events
-              </button>
-              <button className="text-gray-300 hover:text-neon-pink transition-colors font-semibold text-lg flex items-center">
-                <Globe className="w-5 h-5 mr-2" />
-                How It Works
               </button>
             </div>
           </div>
@@ -128,12 +125,10 @@ export default function HomePage() {
       <section className="container-responsive section-spacing">
         <div className="text-center element-spacing">
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black element-spacing">
-            This Weekend's 
-            <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-teal bg-clip-text text-transparent">
-              {" "}Fast Passes
-            </span>
+            <span className="">Upcoming</span>
+            <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-teal bg-clip-text text-transparent"> Fast Passes</span>
           </h2>
-          <p className="text-gray-400 text-xl max-w-2xl mx-auto text-center">
+          <p className="text-gray-400 text-xl max-w-2xl mx-auto center-text">
             Premium clubs, instant access, unforgettable nights. Select your perfect Barcelona experience.
           </p>
         </div>
@@ -168,7 +163,7 @@ export default function HomePage() {
       </section>
 
       {/* How It Works */}
-      <section className="bg-gray-950/50 border-y border-gray-800/50">
+      <section id="how-it-works" ref={howItWorksRef} className="bg-gray-950/50 border-y border-gray-800/50">
         <div className="container-responsive section-spacing flex flex-col items-center justify-center">
           <div className="text-center element-spacing max-w-2xl mx-auto">
             <h2 className="text-4xl sm:text-5xl font-black element-spacing">
@@ -263,11 +258,6 @@ export default function HomePage() {
             <p className="text-gray-500 text-lg element-spacing">
               Premium nightlife access in Barcelona
             </p>
-            <div className="flex items-center justify-center space-x-8 text-sm text-gray-600">
-              <span>Privacy Policy</span>
-              <span>Terms of Service</span>
-              <span>Contact Support</span>
-            </div>
           </div>
         </div>
       </footer>

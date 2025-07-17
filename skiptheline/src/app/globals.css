@@ -621,3 +621,14 @@ body {
 .StripeElement--complete {
   border-color: var(--neon-green);
 }
+
+/* Custom neon border utilities */
+.border-neon-pink-60 {
+  border-color: rgba(255, 45, 114, 0.6) !important;
+}
+.border-neon-teal-60 {
+  border-color: rgba(0, 212, 255, 0.6) !important;
+}
+.border-neon-green-60 {
+  border-color: rgba(0, 255, 136, 0.6) !important;
+}

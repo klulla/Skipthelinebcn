@@ -252,152 +252,9 @@ export default function EventPage() {
       </section>
 
       <div className="container-responsive pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-12">
-            {/* Event Details */}
-            <div className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50">
-              <h2 className="text-3xl font-black mb-8 bg-gradient-to-r from-neon-pink to-neon-teal bg-clip-text text-transparent">
-                Event Details
-              </h2>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-                <div className="space-y-4">
-                  <div className="flex items-center text-gray-300">
-                    <Calendar className="w-6 h-6 mr-4 text-neon-pink" />
-                    <div>
-                      <div className="font-semibold">{formatDate(event.date)}</div>
-                      <div className="text-sm text-gray-500">Event Date</div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center text-gray-300">
-                    <Clock className="w-6 h-6 mr-4 text-neon-teal" />
-                    <div>
-                      <div className="font-semibold">{event.time}</div>
-                      <div className="text-sm text-gray-500">Event Time</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center text-gray-300">
-                    <MapPin className="w-6 h-6 mr-4 text-neon-pink" />
-                    <div>
-                      <div className="font-semibold">{club.location.split(',')[0]}</div>
-                      <div className="text-sm text-gray-500">Venue Location</div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center text-gray-300">
-                    <Users className="w-6 h-6 mr-4 text-neon-purple" />
-                    <div>
-                      <div className="font-semibold">{availableTickets} available</div>
-                      <div className="text-sm text-gray-500">Spots Remaining</div>
-                    </div>
-                  </div>
-                  
-                  {event.lockTime && (
-                    <div className="flex items-center text-gray-300">
-                      <Lock className="w-6 h-6 mr-4 text-orange-400" />
-                      <div>
-                        <div className="font-semibold">
-                          {isEventLocked ? 'Sales Closed' : 'Sales Close Soon'}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {new Date(event.lockTime).toLocaleString()}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="p-6 bg-gradient-to-r from-neon-pink/10 to-neon-teal/10 border border-neon-pink/20 rounded-2xl mb-8">
-                <h3 className="font-bold text-neon-pink mb-4 flex items-center">
-                  <CheckCircle className="w-5 h-5 mr-2" />
-                  VIP Experience Includes
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-gray-300">
-                  <div className="flex items-center">
-                    <Zap className="w-4 h-4 mr-2 text-neon-teal" />
-                    <span>Skip the general line</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Shield className="w-4 h-4 mr-2 text-neon-green" />
-                    <span>VIP/Express entrance</span>
-                  </div>
-                  <div className="flex items-center">
-                    <PartyPopper className="w-4 h-4 mr-2 text-neon-pink" />
-                    <span>Full club access</span>
-                  </div>
-                  <div className="flex items-center">
-                    <CheckCircle className="w-4 h-4 mr-2 text-neon-purple" />
-                    <span>Instant confirmation</span>
-                  </div>
-                </div>
-              </div>
-
-              <p className="text-gray-300 leading-relaxed text-lg">
-                {event.description}
-              </p>
-            </div>
-
-            {/* FAQs */}
-            <div className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50">
-              <h2 className="text-3xl font-black mb-8 bg-gradient-to-r from-neon-pink to-neon-teal bg-clip-text text-transparent">
-                Frequently Asked Questions
-              </h2>
-              
-              <div className="space-y-4">
-                {faqs.map((faq, index) => (
-                  <div key={index} className="border border-gray-700/50 rounded-2xl overflow-hidden">
-                    <button
-                      onClick={() => setExpandedFAQ(expandedFAQ === index ? null : index)}
-                      className="w-full flex items-center justify-between p-6 text-left hover:bg-gray-800/50 transition-colors"
-                    >
-                      <span className="font-semibold text-gray-200 text-lg">{faq.question}</span>
-                      {expandedFAQ === index ? (
-                        <ChevronUp className="w-6 h-6 text-neon-pink" />
-                      ) : (
-                        <ChevronDown className="w-6 h-6 text-gray-400" />
-                      )}
-                    </button>
-                    
-                    {expandedFAQ === index && (
-                      <div className="p-6 pt-0 text-gray-400 leading-relaxed text-lg">
-                        {faq.answer}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Testimonials */}
-            <div className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50">
-              <h2 className="text-3xl font-black mb-8 bg-gradient-to-r from-neon-pink to-neon-teal bg-clip-text text-transparent">
-                What Guests Say
-              </h2>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {testimonials.map((testimonial, index) => (
-                  <div key={index} className="bg-gray-800/50 rounded-2xl p-6 border border-gray-700/30">
-                    <div className="flex items-center mb-4">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                      ))}
-                    </div>
-                    <p className="text-gray-300 mb-4 italic text-lg">"{testimonial.quote}"</p>
-                    <p className="text-gray-500 font-medium">— {testimonial.author}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Purchase Sidebar */}
-          <div className="lg:col-span-1">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          {/* Purchase Sidebar - moved above FAQs/testimonials on mobile */}
+          <div className="lg:col-span-1 order-1 lg:order-2 mb-12 lg:mb-0">
             <div className="glass-effect-strong rounded-3xl border border-gray-700/50 sticky top-28 overflow-hidden">
               <div className="p-8">
                 {!showPayment ? (
@@ -572,6 +429,148 @@ export default function EventPage() {
                   />
                 </>
               )}
+              </div>
+            </div>
+          </div>
+          {/* Main Content (FAQs, testimonials, etc.) */}
+          <div className="lg:col-span-2 order-2 lg:order-1">
+            {/* Event Details */}
+            <div className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50">
+              <h2 className="text-3xl font-black mb-8 bg-gradient-to-r from-neon-pink to-neon-teal bg-clip-text text-transparent">
+                Event Details
+              </h2>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+                <div className="space-y-4">
+                  <div className="flex items-center text-gray-300">
+                    <Calendar className="w-6 h-6 mr-4 text-neon-pink" />
+                    <div>
+                      <div className="font-semibold">{formatDate(event.date)}</div>
+                      <div className="text-sm text-gray-500">Event Date</div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center text-gray-300">
+                    <Clock className="w-6 h-6 mr-4 text-neon-teal" />
+                    <div>
+                      <div className="font-semibold">{event.time}</div>
+                      <div className="text-sm text-gray-500">Event Time</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center text-gray-300">
+                    <MapPin className="w-6 h-6 mr-4 text-neon-pink" />
+                    <div>
+                      <div className="font-semibold">{club.location.split(',')[0]}</div>
+                      <div className="text-sm text-gray-500">Venue Location</div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center text-gray-300">
+                    <Users className="w-6 h-6 mr-4 text-neon-purple" />
+                    <div>
+                      <div className="font-semibold">{availableTickets} available</div>
+                      <div className="text-sm text-gray-500">Spots Remaining</div>
+                    </div>
+                  </div>
+                  
+                  {event.lockTime && (
+                    <div className="flex items-center text-gray-300">
+                      <Lock className="w-6 h-6 mr-4 text-orange-400" />
+                      <div>
+                        <div className="font-semibold">
+                          {isEventLocked ? 'Sales Closed' : 'Sales Close Soon'}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {new Date(event.lockTime).toLocaleString()}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="p-6 bg-gradient-to-r from-neon-pink/10 to-neon-teal/10 border border-neon-pink/20 rounded-2xl mb-8">
+                <h3 className="font-bold text-neon-pink mb-4 flex items-center">
+                  <CheckCircle className="w-5 h-5 mr-2" />
+                  VIP Experience Includes
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-gray-300">
+                  <div className="flex items-center">
+                    <Zap className="w-4 h-4 mr-2 text-neon-teal" />
+                    <span>Skip the general line</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Shield className="w-4 h-4 mr-2 text-neon-green" />
+                    <span>VIP/Express entrance</span>
+                  </div>
+                  <div className="flex items-center">
+                    <PartyPopper className="w-4 h-4 mr-2 text-neon-pink" />
+                    <span>Full club access</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className="w-4 h-4 mr-2 text-neon-purple" />
+                    <span>Instant confirmation</span>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-gray-300 leading-relaxed text-lg">
+                {event.description}
+              </p>
+            </div>
+
+            {/* FAQs */}
+            <div className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50">
+              <h2 className="text-3xl font-black mb-8 bg-gradient-to-r from-neon-pink to-neon-teal bg-clip-text text-transparent">
+                Frequently Asked Questions
+              </h2>
+              
+              <div className="space-y-4">
+                {faqs.map((faq, index) => (
+                  <div key={index} className="border border-gray-700/50 rounded-2xl overflow-hidden">
+                    <button
+                      onClick={() => setExpandedFAQ(expandedFAQ === index ? null : index)}
+                      className="w-full flex items-center justify-between p-6 text-left hover:bg-gray-800/50 transition-colors"
+                    >
+                      <span className="font-semibold text-gray-200 text-lg">{faq.question}</span>
+                      {expandedFAQ === index ? (
+                        <ChevronUp className="w-6 h-6 text-neon-pink" />
+                      ) : (
+                        <ChevronDown className="w-6 h-6 text-gray-400" />
+                      )}
+                    </button>
+                    
+                    {expandedFAQ === index && (
+                      <div className="p-6 pt-0 text-gray-400 leading-relaxed text-lg">
+                        {faq.answer}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Testimonials */}
+            <div className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50">
+              <h2 className="text-3xl font-black mb-8 bg-gradient-to-r from-neon-pink to-neon-teal bg-clip-text text-transparent">
+                What Guests Say
+              </h2>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {testimonials.map((testimonial, index) => (
+                  <div key={index} className="bg-gray-800/50 rounded-2xl p-6 border border-gray-700/30">
+                    <div className="flex items-center mb-4">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                      ))}
+                    </div>
+                    <p className="text-gray-300 mb-4 italic text-lg">"{testimonial.quote}"</p>
+                    <p className="text-gray-500 font-medium">— {testimonial.author}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
