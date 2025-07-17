@@ -40,11 +40,18 @@ export default function AdminPage() {
   // All hooks must be called unconditionally, at the top:
   const [events, setEvents] = useState<Event[]>([]);
   const [purchases, setPurchases] = useState<Purchase[]>([]);
-  const [selectedTab, setSelectedTab] = useState<'overview' | 'events' | 'sales' | 'analytics'>('overview');
+  const [selectedTab, setSelectedTab] = useState<'overview' | 'events' | 'sales' | 'analytics' | 'clubs'>('overview');
   const [showEventForm, setShowEventForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'hidden' | 'sold-out'>('all');
+  
+  // Club management state
+  const [clubs, setClubs] = useState<Club[]>([]);
+  const [showClubForm, setShowClubForm] = useState(false);
+  const [editingClub, setEditingClub] = useState<Club | null>(null);
+  const [clubSearchQuery, setClubSearchQuery] = useState('');
+  const [clubFilterStatus, setClubFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
 
   useEffect(() => {
     if (!loading && !user) {
@@ -56,12 +63,14 @@ export default function AdminPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [eventsData, purchasesData] = await Promise.all([
+        const [eventsData, purchasesData, clubsData] = await Promise.all([
           getEvents(),
-          getPurchases()
+          getPurchases(),
+          getClubs()
         ]);
         setEvents(eventsData);
         setPurchases(purchasesData);
+        setClubs(clubsData);
       } catch (error) {
         // fallback to mock data if Firestore fails
         // import { mockEvents, mockPurchases } from '@/data/mockData';
@@ -180,6 +189,45 @@ export default function AdminPage() {
     }
   };
 
+  // Club management handlers
+  const handleCreateClub = async (clubData: Omit<Club, 'id'>) => {
+    try {
+      const newClub = await createClub(clubData);
+      setClubs(prev => [...prev, newClub]);
+      setShowClubForm(false);
+    } catch (error) {
+      alert('Failed to create club.');
+    }
+  };
+
+  const handleEditClub = async (clubData: Omit<Club, 'id'>) => {
+    if (editingClub) {
+      try {
+        await updateClub(editingClub.id, clubData);
+        setClubs(prev => prev.map(club => 
+          club.id === editingClub.id 
+            ? { ...club, ...clubData }
+            : club
+        ));
+        setEditingClub(null);
+        setShowClubForm(false);
+      } catch (error) {
+        alert('Failed to update club.');
+      }
+    }
+  };
+
+  const deleteClubHandler = async (clubId: string) => {
+    if (confirm('Are you sure you want to delete this club?')) {
+      try {
+        await deleteClub(clubId);
+        setClubs(prev => prev.filter(club => club.id !== clubId));
+      } catch (error) {
+        alert('Failed to delete club.');
+      }
+    }
+  };
+
   const exportGuestList = (eventId: string) => {
     const eventPurchases = purchases.filter(p => p.eventId === eventId);
     const event = events.find(e => e.id === eventId);
@@ -222,6 +270,14 @@ export default function AdminPage() {
     return matchesSearch && matchesFilter;
   });
 
+  // Filter clubs
+  const filteredClubs = clubs.filter(club => {
+    const matchesSearch = club.name.toLowerCase().includes(clubSearchQuery.toLowerCase()) ||
+                         club.location.toLowerCase().includes(clubSearchQuery.toLowerCase());
+    const matchesFilter = clubFilterStatus === 'all' || club.status === clubFilterStatus;
+    return matchesSearch && matchesFilter;
+  });
+
   return (
     <div className="min-h-screen bg-background gradient-bg">
       <Header />
@@ -257,7 +313,8 @@ export default function AdminPage() {
             { key: 'overview', label: 'Overview', icon: BarChart3 },
             { key: 'events', label: 'Events', icon: Calendar },
             { key: 'sales', label: 'Sales', icon: Users },
-            { key: 'analytics', label: 'Analytics', icon: TrendingUp }
+            { key: 'analytics', label: 'Analytics', icon: TrendingUp },
+            { key: 'clubs', label: 'Clubs', icon: Building }
           ].map((tab) => {
             const Icon = tab.icon;
             return (
@@ -577,6 +634,96 @@ export default function AdminPage() {
             </div>
           </div>
         )}
+        {/* Clubs Tab */}
+        {selectedTab === 'clubs' && (
+          <div className="space-y-8">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search clubs..."
+                    value={clubSearchQuery}
+                    onChange={(e) => setClubSearchQuery(e.target.value)}
+                    className="pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-neon-pink transition-colors input-glow w-64"
+                  />
+                </div>
+                <div className="relative">
+                  <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <select
+                    value={clubFilterStatus}
+                    onChange={(e) => setClubFilterStatus(e.target.value as any)}
+                    className="pl-10 pr-8 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-neon-pink transition-colors appearance-none"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setEditingClub(null);
+                  setShowClubForm(true);
+                }}
+                className="btn-neon px-6 py-3 rounded-2xl font-bold text-black ripple flex items-center space-x-2"
+              >
+                <Plus className="w-5 h-5" />
+                <span>Create Club</span>
+              </button>
+            </div>
+            <div className="grid grid-responsive grid-responsive-2 xl:grid-responsive-3">
+              {filteredClubs.map((club) => (
+                <div key={club.id} className="glass-effect-strong rounded-3xl card-spacing border border-gray-700/50 card-hover">
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-white mb-2">{club.name}</h3>
+                      <p className="text-gray-400 font-medium">{club.location}</p>
+                      <p className="text-gray-500 text-sm mt-1">{club.type.charAt(0).toUpperCase() + club.type.slice(1)}</p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => {
+                          setEditingClub(club);
+                          setShowClubForm(true);
+                        }}
+                        className="p-2 bg-neon-teal/10 text-neon-teal rounded-lg hover:bg-neon-teal/20 transition-colors"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => deleteClubHandler(club.id)}
+                        className="p-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-4 mb-6">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Capacity</span>
+                      <span className="text-white font-semibold">{club.capacity}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Amenities</span>
+                      <span className="text-white font-semibold">{club.amenities.length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Status</span>
+                      <span className={`font-bold flex items-center ${
+                        club.status === 'active' ? 'text-green-400' : 'text-gray-400'
+                      }`}>
+                        {club.status === 'active' && <CheckCircle className="w-4 h-4 mr-1" />}
+                        {club.status.toUpperCase()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       {/* Event Form Modal */}
       {showEventForm && (
@@ -588,6 +735,18 @@ export default function AdminPage() {
             setEditingEvent(null);
           }}
           isEditing={!!editingEvent}
+        />
+      )}
+      {/* Club Form Modal */}
+      {showClubForm && (
+        <ClubForm
+          club={editingClub}
+          onSave={editingClub ? handleEditClub : handleCreateClub}
+          onCancel={() => {
+            setShowClubForm(false);
+            setEditingClub(null);
+          }}
+          isEditing={!!editingClub}
         />
       )}
     </div>
