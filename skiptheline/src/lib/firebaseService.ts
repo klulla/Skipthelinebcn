@@ -230,6 +230,26 @@ export const getClubs = async () => {
   }
 };
 
+export const getClubsByCity = async (city: string) => {
+  try {
+    const q = query(
+      clubsCollection, 
+      where('city', '==', city),
+      where('status', '==', 'active'),
+      orderBy('createdAt', 'desc')
+    );
+    const querySnapshot = await getDocs(q);
+    const clubs: Club[] = [];
+    querySnapshot.forEach((doc) => {
+      clubs.push({ id: doc.id, ...doc.data() } as Club);
+    });
+    return clubs;
+  } catch (error) {
+    console.error('Error getting clubs by city:', error);
+    throw error;
+  }
+};
+
 // Sales analytics
 export const getSalesAnalytics = async () => {
   try {

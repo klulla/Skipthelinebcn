@@ -11,7 +11,7 @@ interface EmailData {
 export const sendEmail = async (emailData: EmailData) => {
   try {
     const { data, error } = await resend.emails.send({
-      from: 'SkipTheLine Barcelona <noreply@skipthelinebcn.com>',
+      from: 'SkipTheLine <noreply@skiptheline.com>',
       to: emailData.to,
       subject: emailData.subject,
       html: emailData.html,

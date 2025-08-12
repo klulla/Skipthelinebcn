@@ -1,6 +1,7 @@
 export interface Club {
   id: string;
   name: string;
+  city: string; // New field for city-based organization
   location: string;
   description: string;
   imageUrl: string;

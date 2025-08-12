@@ -266,7 +266,7 @@ function ConfirmationPageContent() {
               <p className="text-neon-teal text-sm">
                 WhatsApp: +34 123 456 789
                 <br />
-                Email: support@skiptheline.barcelona
+                Email: support@skiptheline.com
               </p>
             </div>
           </div>

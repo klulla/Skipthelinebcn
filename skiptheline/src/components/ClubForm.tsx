@@ -6,9 +6,10 @@ import { Club } from '@/types';
 
 interface ClubFormProps {
   club?: Club | null;
-  onSave: (clubData: Omit<Club, 'id'>) => Promise<void>;
+  onSave: (clubData: Omit<Club, 'id'>) => void;
   onCancel: () => void;
   isEditing?: boolean;
+  cities?: Array<{ id: string; name: string; status: string }>;
 }
 
 const clubTypes = [
@@ -24,16 +25,17 @@ const amenities = [
   'Cocktail Bar', 'Beer Garden', 'Terrace', 'Private Rooms'
 ];
 
-export default function ClubForm({ club, onSave, onCancel, isEditing = false }: ClubFormProps) {
-  const [formData, setFormData] = useState({
-    name: '',
-    location: '',
-    description: '',
-    imageUrl: '',
-    capacity: 100,
-    type: 'nightclub' as 'nightclub' | 'rooftop' | 'beach' | 'underground',
-    amenities: [] as string[],
-    status: 'active' as 'active' | 'inactive'
+export default function ClubForm({ club, onSave, onCancel, isEditing = false, cities }: ClubFormProps) {
+  const [formData, setFormData] = useState<Omit<Club, 'id'>>({
+    name: club?.name || '',
+    city: club?.city || '',
+    location: club?.location || '',
+    description: club?.description || '',
+    imageUrl: club?.imageUrl || '',
+    capacity: club?.capacity || 100,
+    type: club?.type || 'nightclub',
+    amenities: club?.amenities || [],
+    status: club?.status || 'active'
   });
   const [loading, setLoading] = useState(false);
 
@@ -41,6 +43,7 @@ export default function ClubForm({ club, onSave, onCancel, isEditing = false }: 
     if (club) {
       setFormData({
         name: club.name,
+        city: club.city,
         location: club.location,
         description: club.description,
         imageUrl: club.imageUrl,
@@ -107,34 +110,62 @@ export default function ClubForm({ club, onSave, onCancel, isEditing = false }: 
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-3">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   Club Name
                 </label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full px-4 py-4 bg-gray-800/50 border border-gray-600 rounded-2xl focus:border-neon-pink focus:outline-none text-white transition-colors input-glow"
-                  required
+                  className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-neon-pink focus:outline-none transition-colors"
+                  placeholder="Enter club name"
                 />
               </div>
-              
+
               <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-3">
-                  Location
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  City
                 </label>
-                <div className="relative">
-                  <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                {cities && cities.length > 0 ? (
+                  <select
+                    value={formData.city}
+                    onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                    className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-neon-pink focus:outline-none transition-colors"
+                    required
+                  >
+                    <option value="">Select a city</option>
+                    {cities
+                      .filter(city => city.status === 'active')
+                      .map(city => (
+                        <option key={city.id} value={city.name}>
+                          {city.name}
+                        </option>
+                      ))}
+                  </select>
+                ) : (
                   <input
                     type="text"
-                    value={formData.location}
-                    onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                    className="w-full pl-12 pr-4 py-4 bg-gray-800/50 border border-gray-600 rounded-2xl focus:border-neon-pink focus:outline-none text-white transition-colors input-glow"
-                    placeholder="Barcelona, Spain"
+                    value={formData.city}
+                    onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                    className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-neon-pink focus:outline-none transition-colors"
+                    placeholder="Enter city name"
                     required
                   />
-                </div>
+                )}
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Location
+              </label>
+              <input
+                type="text"
+                value={formData.location}
+                onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-neon-pink focus:outline-none transition-colors"
+                placeholder="Enter full address or location"
+              />
             </div>
 
             <div>

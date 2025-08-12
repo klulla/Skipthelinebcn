@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #ff2d72; font-size: 28px; margin: 0;">SkipTheLine Barcelona</h1>
+            <h1 style="color: #ff2d72; font-size: 28px; margin: 0;">SkipTheLine</h1>
             <h2 style="color: #333; margin: 10px 0;">Booking Confirmed! 🎉</h2>
           </div>
           
@@ -39,11 +39,8 @@ export async function POST(request: NextRequest) {
           </div>
           
           <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
-            <p style="color: #666; font-size: 14px;">
-              Questions? Contact us at <a href="mailto:support@skipthelinebcn.com" style="color: #ff2d72;">support@skipthelinebcn.com</a>
-            </p>
-            <p style="color: #999; font-size: 12px;">
-              SkipTheLine Barcelona - Premium Nightlife Access
+            <p style="color: #666666; font-size: 14px; margin: 20px 0 0 0;">
+              SkipTheLine - Premium Nightlife Access
             </p>
           </div>
         </div>

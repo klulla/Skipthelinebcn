@@ -65,7 +65,7 @@ export default function HomePage() {
             </h1>
             
             <p className="text-xl sm:text-2xl text-gray-300 element-spacing max-w-4xl mx-auto leading-relaxed font-medium center-text">
-              VIP fast-entry to Barcelona's most exclusive clubs. 
+              VIP fast-entry to the world's most exclusive clubs. 
               <br className="hidden sm:block" />
               <span className="text-neon-teal">No guestlist, no waiting</span> — just pure nightlife access.
             </p>
@@ -87,10 +87,10 @@ export default function HomePage() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
               <button
-                onClick={() => window.location.href = '/clubs'}
+                onClick={() => window.location.href = '/cities'}
                 className="btn-neon px-12 py-4 rounded-2xl font-bold text-lg text-black ripple"
               >
-                Browse Events
+                Browse Cities
               </button>
             </div>
           </div>
@@ -129,7 +129,7 @@ export default function HomePage() {
             <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-teal bg-clip-text text-transparent"> Fast Passes</span>
           </h2>
           <p className="text-gray-400 text-xl max-w-2xl mx-auto center-text">
-            Premium clubs, instant access, unforgettable nights. Select your perfect Barcelona experience.
+            Premium clubs, instant access, unforgettable nights. Select your perfect nightlife experience.
           </p>
         </div>
 
@@ -154,7 +154,7 @@ export default function HomePage() {
                 No Events Available
               </h3>
               <p className="text-gray-500 text-lg leading-relaxed">
-                Check back soon for the latest Barcelona nightlife fast passes! 
+                Check back soon for the latest nightlife fast passes! 
                 Follow us for updates on new events.
               </p>
             </div>
@@ -184,9 +184,9 @@ export default function HomePage() {
                   <TrendingUp className="w-4 h-4 text-black" />
                 </div>
               </div>
-              <h3 className="text-2xl font-bold element-spacing">Choose Your Event</h3>
+              <h3 className="text-2xl font-bold element-spacing">Choose Your City</h3>
               <p className="text-gray-400 text-lg leading-relaxed px-4">
-                Browse premium clubs and select your perfect night out experience. Each venue hand-picked for quality.
+                Browse cities and select your perfect night out destination. Each venue hand-picked for quality.
               </p>
             </div>
 
@@ -231,13 +231,13 @@ export default function HomePage() {
               Ready to Skip The Line?
             </h2>
             <p className="text-gray-400 text-lg element-spacing max-w-2xl mx-auto">
-              Join thousands of smart party-goers who've discovered the secret to Barcelona's best nights out.
+              Join thousands of smart party-goers who've discovered the secret to the world's best nights out.
             </p>
             <button
-              onClick={() => window.location.href = '/clubs'}
+              onClick={() => window.location.href = '/cities'}
               className="btn-neon px-10 py-4 rounded-2xl font-bold text-lg text-black ripple mt-4"
             >
-              View Tonight's Events
+              Browse Cities
             </button>
           </div>
         </div>
@@ -256,7 +256,7 @@ export default function HomePage() {
               </span>
             </div>
             <p className="text-gray-500 text-lg element-spacing">
-              Premium nightlife access in Barcelona
+              Premium nightlife access worldwide
             </p>
           </div>
         </div>

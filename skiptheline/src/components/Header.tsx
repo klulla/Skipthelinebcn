@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Zap, Menu, X, Shield, Star } from 'lucide-react';
+import { Zap, Menu, X, Shield, Star, Globe } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Header() {
@@ -20,12 +20,20 @@ export default function Header() {
               <span className="text-2xl font-black bg-gradient-to-r from-neon-pink via-neon-purple to-neon-teal bg-clip-text text-transparent">
                 SkipTheLine
               </span>
-              <span className="text-xs text-gray-400 font-medium">Barcelona Nightlife</span>
+              <span className="text-xs text-gray-400 font-medium">Premium Nightlife Access</span>
             </div>
           </Link>
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
+            <Link 
+              href="/cities" 
+              className="text-gray-300 hover:text-neon-pink transition-colors font-semibold text-lg flex items-center space-x-2 group"
+            >
+              <Globe className="w-4 h-4 group-hover:text-neon-pink transition-colors" />
+              <span>Cities</span>
+            </Link>
+            
             <Link 
               href="/" 
               className="text-gray-300 hover:text-neon-pink transition-colors font-semibold text-lg flex items-center space-x-2 group"
@@ -53,6 +61,15 @@ export default function Header() {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-700/50">
             <div className="flex flex-col space-y-4">
+              <Link 
+                href="/cities" 
+                className="text-gray-300 hover:text-neon-pink transition-colors font-semibold flex items-center space-x-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Globe className="w-4 h-4" />
+                <span>Cities</span>
+              </Link>
+              
               <Link 
                 href="/" 
                 className="text-gray-300 hover:text-neon-pink transition-colors font-semibold flex items-center space-x-2"

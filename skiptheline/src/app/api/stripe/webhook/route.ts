@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
                   <li>Confirmation ID: ${confirmationId || purchase.confirmationId}</li>
                 </ul>
                 <p>We'll see you there!</p>
-                <p>- SkipTheLine Barcelona Team</p>
+                <p>- SkipTheLine Team</p>
               `
             });
             console.log('✅ Confirmation email sent successfully');
