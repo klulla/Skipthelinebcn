@@ -59,6 +59,16 @@ export default function EventCard({ event }: EventCardProps) {
   const isSoldOut = event.status === 'sold-out' || availableTickets <= 0;
   const soldPercentage = ((event.maxTickets - event.availability) / event.maxTickets) * 100;
 
+  // Get currency symbol
+  const getCurrencySymbol = (currency: 'EUR' | 'GBP' | 'USD'): string => {
+    switch (currency) {
+      case 'EUR': return '€';
+      case 'GBP': return '£';
+      case 'USD': return '$';
+      default: return '€';
+    }
+  };
+
   return (
     <div className="group relative overflow-hidden rounded-3xl glass-effect-strong hover:border-neon-pink/30 transition-all duration-500 card-hover">
       {/* Background Image with Overlay */}
@@ -164,7 +174,7 @@ export default function EventCard({ event }: EventCardProps) {
         <div className="flex items-center justify-between">
           <div>
             <div className="text-3xl font-black text-transparent bg-gradient-to-r from-neon-pink to-neon-teal bg-clip-text">
-              €{event.price}
+              {getCurrencySymbol(event.currency)}{event.price}
             </div>
             <div className="text-gray-400 text-sm font-medium">per person</div>
           </div>

@@ -16,7 +16,8 @@ import {
   Building,
   AlertCircle,
   ChevronDown,
-  Lock
+  Lock,
+  Globe
 } from 'lucide-react';
 
 interface EventFormProps {
@@ -33,6 +34,7 @@ export default function EventForm({ event, onSave, onCancel, isEditing = false }
     date: event?.date || '',
     time: event?.time || '',
     price: event?.price || 0,
+    currency: event?.currency || 'EUR',
     description: event?.description || '',
     maxTickets: event?.maxTickets || 0,
     imageUrl: event?.imageUrl || '',
@@ -242,11 +244,11 @@ export default function EventForm({ event, onSave, onCancel, isEditing = false }
           </div>
 
           {/* Price and Tickets */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-gray-300">
                 <Euro className="inline w-4 h-4 mr-2" />
-                Price (€)
+                Price
               </label>
               <input
                 type="number"
@@ -265,6 +267,22 @@ export default function EventForm({ event, onSave, onCancel, isEditing = false }
                   {errors.price}
                 </p>
               )}
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-300">
+                <Globe className="inline w-4 h-4 mr-2" />
+                Currency
+              </label>
+              <select
+                value={formData.currency}
+                onChange={(e) => handleChange('currency', e.target.value as 'EUR' | 'GBP' | 'USD')}
+                className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-neon-pink focus:outline-none transition-colors"
+              >
+                <option value="EUR">EUR (€)</option>
+                <option value="GBP">GBP (£)</option>
+                <option value="USD">USD ($)</option>
+              </select>
             </div>
 
             <div className="space-y-2">

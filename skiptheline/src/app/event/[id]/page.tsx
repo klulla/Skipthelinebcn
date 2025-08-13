@@ -148,6 +148,16 @@ export default function EventPage() {
   const totalPrice = partySizeNum * event.price;
   const soldPercentage = ((event.maxTickets - event.availability) / event.maxTickets) * 100;
 
+  // Get currency symbol
+  const getCurrencySymbol = (currency: 'EUR' | 'GBP' | 'USD'): string => {
+    switch (currency) {
+      case 'EUR': return '€';
+      case 'GBP': return '£';
+      case 'USD': return '$';
+      default: return '€';
+    }
+  };
+
   const validatePartySize = (value: string): boolean => {
     const num = parseInt(value);
     
@@ -261,7 +271,7 @@ export default function EventPage() {
                 <>
                   <div className="text-center mb-8">
                     <div className="text-4xl font-black text-transparent bg-gradient-to-r from-neon-pink to-neon-teal bg-clip-text mb-2">
-                      €{event.price}
+                      {getCurrencySymbol(event.currency)}{event.price}
                       <span className="text-lg text-gray-400 font-normal"> / person</span>
                     </div>
                     
@@ -341,11 +351,11 @@ export default function EventPage() {
                         <div className="bg-gray-800/50 rounded-2xl p-6 border border-gray-700/50">
                           <div className="flex justify-between items-center mb-3">
                             <span className="text-gray-400">Fast Pass × {partySizeNum}</span>
-                            <span className="text-gray-300 font-semibold">€{totalPrice}</span>
+                            <span className="text-gray-300 font-semibold">{getCurrencySymbol(event.currency)}{totalPrice}</span>
                           </div>
                           <div className="flex justify-between items-center font-bold text-xl">
                             <span className="text-gray-200">Total</span>
-                            <span className="text-transparent bg-gradient-to-r from-neon-pink to-neon-teal bg-clip-text">€{totalPrice}</span>
+                            <span className="text-transparent bg-gradient-to-r from-neon-teal to-neon-pink bg-clip-text">{getCurrencySymbol(event.currency)}{totalPrice}</span>
                           </div>
                         </div>
                       )}
@@ -421,6 +431,7 @@ export default function EventPage() {
                   </div>
                   <PaymentForm
                     amount={totalPrice}
+                    currency={event.currency}
                     eventId={event.id}
                     eventTitle={event.title}
                     partySize={partySizeNum}

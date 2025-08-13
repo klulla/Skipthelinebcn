@@ -18,6 +18,7 @@ export interface Event {
   date: string;
   time: string;
   price: number;
+  currency: 'EUR' | 'GBP' | 'USD';
   description: string;
   // Removed arrivalWindow
   maxTickets: number;
@@ -63,6 +64,7 @@ export interface EventFormData {
   date: string;
   time: string;
   price: number;
+  currency: 'EUR' | 'GBP' | 'USD';
   description: string;
   // Removed arrivalWindow
   maxTickets: number;

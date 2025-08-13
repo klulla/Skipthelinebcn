@@ -6,6 +6,7 @@ import { ExternalLink, Shield, CheckCircle, AlertCircle, Loader, Mail, FileSprea
 
 interface PaymentFormProps {
   amount: number;
+  currency: 'EUR' | 'GBP' | 'USD';
   eventId: string;
   eventTitle: string;
   partySize: number;
@@ -26,7 +27,17 @@ const generateConfirmationId = (): string => {
   return result;
 };
 
-export default function PaymentForm({ amount, eventId, eventTitle, partySize, customerInfo, stripePaymentLink }: PaymentFormProps) {
+// Get currency symbol
+const getCurrencySymbol = (currency: 'EUR' | 'GBP' | 'USD'): string => {
+  switch (currency) {
+    case 'EUR': return '€';
+    case 'GBP': return '£';
+    case 'USD': return '$';
+    default: return '€';
+  }
+};
+
+export default function PaymentForm({ amount, currency, eventId, eventTitle, partySize, customerInfo, stripePaymentLink }: PaymentFormProps) {
   const router = useRouter();
   const [confirmationId, setConfirmationId] = useState('');
   const [copied, setCopied] = useState(false);
@@ -61,6 +72,7 @@ export default function PaymentForm({ amount, eventId, eventTitle, partySize, cu
           guestName: customerInfo.name,
           email: customerInfo.email,
           confirmationId,
+          currency,
           redirectUrl: `${window.location.origin}/confirmation?id=${confirmationId}&event=${eventId}&party=${partySize}&total=${amount}`
         }),
       });
@@ -108,12 +120,12 @@ export default function PaymentForm({ amount, eventId, eventTitle, partySize, cu
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">Price per person</span>
-              <span className="text-white font-medium">€{amount / partySize}</span>
+              <span className="text-white font-medium">{getCurrencySymbol(currency)}{amount / partySize}</span>
             </div>
             <div className="border-t border-gray-700 pt-3">
               <div className="flex justify-between">
                 <span className="text-lg font-bold text-white">Total</span>
-                <span className="text-2xl font-black text-neon-pink">€{amount}</span>
+                <span className="text-2xl font-black text-neon-pink">{getCurrencySymbol(currency)}{amount}</span>
               </div>
             </div>
           </div>

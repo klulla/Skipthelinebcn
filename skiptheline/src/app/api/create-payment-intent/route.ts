@@ -15,7 +15,8 @@ export async function POST(request: NextRequest) {
       guestName, 
       email, 
       confirmationId, 
-      redirectUrl 
+      redirectUrl,
+      currency
     } = await request.json();
 
     console.log('🔗 Creating payment link with data:', {
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest) {
       redirectUrl
     });
 
-    if (!amount || !quantity || !eventId || !eventTitle || !guestName || !email || !confirmationId) {
+    if (!amount || !quantity || !eventId || !eventTitle || !guestName || !email || !confirmationId || !currency) {
       console.log('❌ Missing required parameters');
       return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
     }
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
     const price = await stripe.prices.create({
       product: product.id,
       unit_amount: Math.round(amount / quantity), // Price per person in cents
-      currency: 'eur',
+      currency: currency.toLowerCase(),
     });
 
     const metadata = {

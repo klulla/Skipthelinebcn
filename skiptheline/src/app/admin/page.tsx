@@ -52,6 +52,16 @@ export default function AdminPage() {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [analytics, setAnalytics] = useState<any>(null);
+
+  // Get currency symbol
+  const getCurrencySymbol = (currency: 'EUR' | 'GBP' | 'USD'): string => {
+    switch (currency) {
+      case 'EUR': return '€';
+      case 'GBP': return '£';
+      case 'USD': return '$';
+      default: return '€';
+    }
+  };
   
   // Loading states
   const [loading, setLoading] = useState(true);
@@ -477,7 +487,7 @@ export default function AdminPage() {
                     <div className="flex-1">
                       <h3 className="text-xl font-bold text-white mb-2">{event.title}</h3>
                       <p className="text-gray-400 font-medium">{event.date} at {event.time}</p>
-                      <p className="text-gray-500 text-sm mt-1">€{event.price}</p>
+                      <p className="text-gray-500 text-sm mt-1">{getCurrencySymbol(event.currency)}{event.price}</p>
                     </div>
                     <div className="flex items-center space-x-2">
                       <button
