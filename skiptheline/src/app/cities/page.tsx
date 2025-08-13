@@ -68,10 +68,7 @@ export default function CitiesPage() {
               Nightlife Destination
             </span>
           </h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Select a city to explore exclusive clubs and secure your VIP fast-entry. 
-            Premium venues, instant access, unforgettable nights.
-          </p>
+
         </div>
 
         {/* Cities Grid */}

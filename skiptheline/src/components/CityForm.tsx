@@ -19,6 +19,8 @@ interface CityFormProps {
 }
 
 export default function CityForm({ city, onSave, onCancel, isEditing = false }: CityFormProps) {
+  console.log('CityForm rendered with props:', { city, isEditing });
+  
   const [formData, setFormData] = useState<Omit<City, 'id'>>({
     name: city?.name || '',
     description: city?.description || '',
@@ -26,6 +28,8 @@ export default function CityForm({ city, onSave, onCancel, isEditing = false }: 
     status: city?.status || 'active'
   });
   const [loading, setLoading] = useState(false);
+
+  console.log('CityForm formData state:', formData);
 
   useEffect(() => {
     if (city) {
@@ -40,12 +44,27 @@ export default function CityForm({ city, onSave, onCancel, isEditing = false }: 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('CityForm submit triggered with data:', formData);
+    
+    // Check if form data is valid
+    if (!formData.name.trim() || !formData.description.trim() || !formData.imageUrl.trim()) {
+      console.error('Form validation failed:', {
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        imageUrl: formData.imageUrl.trim()
+      });
+      alert('Please fill in all required fields');
+      return;
+    }
+    
+    console.log('Form validation passed, calling onSave...');
     setLoading(true);
     
     try {
       await onSave(formData);
+      console.log('CityForm onSave completed successfully');
     } catch (error) {
-      console.error('Error saving city:', error);
+      console.error('Error in CityForm onSave:', error);
     } finally {
       setLoading(false);
     }
@@ -151,7 +170,8 @@ export default function CityForm({ city, onSave, onCancel, isEditing = false }: 
             <button
               type="submit"
               disabled={loading || !formData.name.trim() || !formData.description.trim() || !formData.imageUrl.trim()}
-              className="px-8 py-4 btn-neon text-black font-bold rounded-2xl transition-all duration-300 ripple disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-8 py-4 bg-gradient-to-r from-neon-pink to-neon-teal text-black font-bold rounded-2xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105"
+              onClick={() => console.log('Submit button clicked, form data:', formData)}
             >
               {loading ? 'Saving...' : isEditing ? 'Update City' : 'Create City'}
             </button>

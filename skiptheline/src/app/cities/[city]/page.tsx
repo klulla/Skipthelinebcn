@@ -115,18 +115,19 @@ export default function CityClubsPage() {
         </div>
 
         {/* Header */}
-        <div className="text-center element-spacing">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black element-spacing">
-            {cityName}'s Premier
-            <br />
-            <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-teal bg-clip-text text-transparent">
-              Nightlife Venues
-            </span>
-          </h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Discover {cityName}'s hottest clubs and secure your VIP fast-entry. 
-            Click on any venue to see available events.
-          </p>
+        <div className="element-spacing">
+          <div className="mx-auto max-w-screen-xl px-4">
+            <div className="text-center space-y-4">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black">
+                {cityName}'s Premier
+                <br />
+                <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-teal bg-clip-text text-transparent">
+                  Nightlife Venues
+                </span>
+              </h1>
+              
+            </div>
+          </div>
         </div>
 
         {/* Search and Filter */}

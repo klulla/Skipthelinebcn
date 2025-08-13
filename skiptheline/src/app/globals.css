@@ -480,9 +480,39 @@ body {
 }
 
 .center-text {
+  text-align: center !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Force text centering for banner */
+.banner-text-center {
+  text-align: center !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 72rem !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Force header spacing */
+.header-nav-spacing {
+  gap: 4rem !important;
+}
+
+.header-secure-spacing {
+  margin-left: 3rem !important;
+}
+
+/* Debug styles - remove these after testing */
+.banner-text-center::before {
+  content: "CENTERED TEXT";
+  display: block;
+  background: red;
+  color: white;
   text-align: center;
-  margin-left: auto;
-  margin-right: auto;
+  font-size: 12px;
+  margin-bottom: 10px;
 }
 
 /* Enhanced spacing for better padding */

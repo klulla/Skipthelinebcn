@@ -71,15 +71,24 @@ export default function HomePage() {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 element-spacing px-4 sm:px-8 md:px-16 lg:px-32 xl:px-48">
-              <div className="flex items-center justify-center text-neon-teal bg-neon-teal/10 px-8 py-4 rounded-full glass-effect border-2 border-neon-teal-60 shadow-lg">
+              <div 
+                className="flex items-center justify-center text-neon-teal bg-neon-teal/10 rounded-full glass-effect border-2 border-neon-teal-60 shadow-lg"
+                style={{ padding: '0.375rem 0.75rem' }}
+              >
                 <Star className="w-7 h-7 mr-3" />
                 <span className="font-semibold text-lg">VIP Line Access</span>
               </div>
-              <div className="flex items-center justify-center text-neon-pink bg-neon-pink/10 px-8 py-4 rounded-full glass-effect border-2 border-neon-pink-60 shadow-lg">
+              <div 
+                className="flex items-center justify-center text-neon-pink bg-neon-pink/10 rounded-full glass-effect border-2 border-neon-pink-60 shadow-lg"
+                style={{ padding: '0.375rem 0.75rem' }}
+              >
                 <Sparkles className="w-7 h-7 mr-3" />
                 <span className="font-semibold text-lg">Instant Entry</span>
               </div>
-              <div className="flex items-center justify-center text-neon-green bg-neon-green/10 px-8 py-4 rounded-full glass-effect border-2 border-neon-green-60 shadow-lg">
+              <div 
+                className="flex items-center justify-center text-neon-green bg-neon-green/10 rounded-full glass-effect border-2 border-neon-green-60 shadow-lg"
+                style={{ padding: '0.375rem 0.75rem' }}
+              >
                 <Shield className="w-7 h-7 mr-3" />
                 <span className="font-semibold text-lg">100% Guaranteed</span>
               </div>

@@ -25,7 +25,10 @@ export default function Header() {
           </Link>
           
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav 
+            className="hidden md:flex items-center"
+            style={{ gap: '0.25rem' }}
+          >
             <Link 
               href="/cities" 
               className="text-gray-300 hover:text-neon-pink transition-colors font-semibold text-lg flex items-center space-x-2 group"
@@ -42,7 +45,10 @@ export default function Header() {
               <span>Events</span>
             </Link>
             
-            <div className="flex items-center space-x-2 text-gray-400 text-sm">
+            <div 
+              className="flex items-center space-x-2 text-gray-400 text-sm"
+              style={{ marginLeft: '0.25rem' }}
+            >
               <Shield className="w-4 h-4 text-neon-green" />
               <span>Secure • Instant • Guaranteed</span>
             </div>
